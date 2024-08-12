@@ -32,6 +32,22 @@ struct WorldData
 
 int gPort = 55555;
 int numPlayersConnected = 0;
+
+int ballDirX = -1;
+int ballDirY = 1;
+int xSpeed = 0;
+int ySpeed = 0;
+
+PlayerData player1{};
+PlayerData player2{};
+FrameData inData{};
+WorldData outData{};
+BallData ball{};
+
+
+
+void update();
+
 int main()
 {
 	WSADATA wsaData;
@@ -164,13 +180,19 @@ int main()
 
 	// int send ( SOCKET, const char* buf //MESSAGE//, int len //Length of Message Array(individual characters)//, int flags //DEFAULT OK- pass 0//); 
 	//  returns number of bytes sent, non-zero is ideal here
-	PlayerData player1{};
-	PlayerData player2{};
-	FrameData inData{};
-	WorldData outData{};
+
+	ball.xpos = 785;
+	ball.ypos = 435;
+
+	xSpeed = 3;
+	ySpeed = 3;
+
+	ballDirX = -1;
+	ballDirY = 1;
 	
-	
-	
+	player1.xpos = 40;
+	player2.xpos = 1510;
+
 	while (true)
 	{
 		int readBytes = 0;
@@ -193,6 +215,9 @@ int main()
 		}
 
 		// Update world here
+
+
+
 		std::string tmp = "000";
 		tmp.at(0) = readBuffer[0];
 		tmp.at(1) = readBuffer[1];
@@ -208,11 +233,33 @@ int main()
 
 		int newYPos2 = stoi(tmp2);
 		player2.ypos = newYPos2;
+
+		
+
+		update();
+		std::string ballxStr = "0000";
+		std::string bx = std::to_string(ball.xpos);
+		size_t diff = ballxStr.length() - bx.length();
+		for (size_t i = 0; i < bx.length(); i++)
+		{
+			ballxStr.at(i + diff) =  bx.at(i);
+		}
+
+
+		std::string ballyStr = "000";
+		std::string by = std::to_string(ball.ypos);
+		size_t diffy = ballyStr.length() - by.length();
+		for (size_t i = 0; i < by.length(); i++)
+		{
+			ballyStr.at(i + diffy) = by.at(i);
+		}
+
+
 		// package updated data into message string and add it to the write buffer
 
 
 		int sentBytes = 0;
-		char writeBuffer[14] = { tmp[0],tmp[1],tmp[2],tmp2[0],tmp2[1],tmp2[2],'0','7','8','5','4','3','5','\0'};
+		char writeBuffer[14] = { tmp[0],tmp[1],tmp[2],tmp2[0],tmp2[1],tmp2[2],ballxStr[0],ballxStr[1],ballxStr[2],ballxStr[3],ballyStr[0],ballyStr[1],ballyStr[2],'\0'};
 	    sentBytes = send(clientPipeSocket, writeBuffer, 14, 0);
 		if (sentBytes == SOCKET_ERROR)
 		{
@@ -222,7 +269,7 @@ int main()
 		}
 
 		int sentBytes2 = 0;
-		char writeBuffer2[14] = { tmp2[0],tmp2[1],tmp2[2],tmp[0],tmp[1],tmp[2],'0','7','8','5','4','3','5','\0' };
+		char writeBuffer2[14] = { tmp2[0],tmp2[1],tmp2[2],tmp[0],tmp[1],tmp[2],ballxStr[0],ballxStr[1],ballxStr[2],ballxStr[3],ballyStr[0],ballyStr[1],ballyStr[2],'\0' };
 		sentBytes2 = send(clientPipeSocket2, writeBuffer2, 14, 0);
 		if (sentBytes2 == SOCKET_ERROR)
 		{
@@ -257,3 +304,57 @@ int main()
 	return 0;
 }
 
+void update()
+{
+	
+
+	ball.xpos += (int)((float)(ballDirX * xSpeed));
+	ball.ypos += (int)((float)(ballDirY * ySpeed));
+
+	if (ball.xpos < 0)
+	{
+		std::cout << "Player2 Scored" << std::endl;
+		system("Pause");
+		ball.xpos = 785;
+		ball.ypos = 435;
+	}
+	if (ball.xpos >= 1600 - 30)
+	{
+		std::cout << "Player1 Scored" << std::endl;
+		system("Pause");
+		ball.xpos = 785;
+		ball.ypos = 435;
+	}
+	if (ball.ypos <= 0)
+	{
+		ballDirY = -ballDirY;
+	}
+	if (ball.ypos >= 900 - 30)
+	{
+		ballDirY = -ballDirY;
+	}
+
+	if (ball.xpos < 100)
+	{
+		if (ball.xpos < player1.xpos + 30 && ball.xpos + 30 > player1.xpos &&
+			ball.ypos < player1.ypos + 140 && ball.ypos + 30 > player1.ypos)
+		{
+			//collided
+			ballDirX = -ballDirX;
+			
+		}
+	}
+
+	if (ball.xpos > 1300)
+	{
+		if (ball.xpos < player2.xpos + 30 && ball.xpos + 30 > player2.xpos &&
+			ball.ypos < player2.ypos + 140 && ball.ypos + 30 > player2.ypos)
+		{
+			//collided
+			ballDirX = -ballDirX;
+			
+		}
+	}
+
+	
+}
