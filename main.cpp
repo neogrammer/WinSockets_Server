@@ -78,39 +78,63 @@ int main()
 		std::cout << "socket() is OK!" << std::endl;
 	}
 
-	// bind the specifics for the socket with its specific configuration
-	sockaddr_in service;
-	service.sin_family = AF_INET;
-	InetPton(AF_INET, L"127.0.0.1", &service.sin_addr.s_addr);
-	service.sin_port = htons(gPort);
-	if (bind(listener, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
-	{
-		std::cout << "bind failed on listener" << WSAGetLastError() << std::endl;
-		closesocket(listener);
-		WSACleanup();
-		return 0;
-	}
-	else
-	{
-		std::cout << "Socket bound!" << std::endl;
-	}
+   // Get the hostname of the current machine
+char hostname[256];
+if (gethostname(hostname, sizeof(hostname)) != 0) {
+	std::cout << "gethostname failed" << std::endl;
+	WSACleanup();
+	return 0;
+}
 
-	if (listen(listener, 8) == SOCKET_ERROR)
-	{
-		std::cout << "listen(): Error listening on socket! " << WSAGetLastError() << std::endl;
-		closesocket(listener);
-		WSACleanup();
-		return 0;
-	}
-	else
-	{
-		std::cout << "Socket now listening for incoming requests on port: " << gPort << std::endl;
-	}
+// Get the IP address of the current machine
+struct addrinfo hints, * result, * ptr;
+ZeroMemory(&hints, sizeof(hints));
+hints.ai_family = AF_INET;
+hints.ai_socktype = SOCK_STREAM;
+hints.ai_flags = AI_PASSIVE;
 
-	std::cout << "Waiting for client connection" << std::endl;
+if (getaddrinfo(hostname, NULL, &hints, &result) != 0) {
+	std::cout << "getaddrinfo failed" << std::endl;
+	WSACleanup();
+	return 0;
+}
+
+sockaddr_in service;
+for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+	if (ptr->ai_family == AF_INET) {
+		service.sin_family = AF_INET;
+		service.sin_addr = ((struct sockaddr_in*)ptr->ai_addr)->sin_addr;
+		service.sin_port = htons(gPort);
+		break;
+	}
+}
+
+freeaddrinfo(result);
+
+// bind the specifics for the socket with its specific configuration
+if (bind(listener, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) {
+	std::cout << "bind failed on listener" << WSAGetLastError() << std::endl;
+	closesocket(listener);
+	WSACleanup();
+	return 0;
+}
+else {
+	std::cout << "Socket bound!" << std::endl;
+}
+
+if (listen(listener, 8) == SOCKET_ERROR) {
+	std::cout << "listen(): Error listening on socket! " << WSAGetLastError() << std::endl;
+	closesocket(listener);
+	WSACleanup();
+	return 0;
+}
+else {
+	std::cout << "Socket now listening for incoming requests on port: " << gPort << std::endl;
+}
+
+std::cout << "Waiting for client connection" << std::endl;
 
 	SOCKET clientPipeSocket = INVALID_SOCKET;
-	SOCKET clientPipeSocket2 = INVALID_SOCKET;
 	clientPipeSocket = accept(listener, NULL, NULL);
 	if (clientPipeSocket == INVALID_SOCKET)
 	{
@@ -126,11 +150,12 @@ int main()
 		numPlayersConnected++;
 	}
 	
+	SOCKET clientPipeSocket2 = INVALID_SOCKET;
 	clientPipeSocket2 = accept(listener, NULL, NULL);
 	if (clientPipeSocket2 == INVALID_SOCKET)
 	{
 		std::cout << "accept failed with player 2: " << WSAGetLastError() << std::endl;
-		closesocket(clientPipeSocket);
+		closesocket(clientPipeSocket2);
 		closesocket(listener);
 		WSACleanup();
 		return 0;
@@ -358,3 +383,94 @@ void update()
 
 	
 }
+
+
+//
+//#include <winsock2.h>
+//#include <ws2tcpip.h>
+//#include <iostream>
+//
+//int main() {
+//	WSADATA wsaData;
+//	int wsaerr;
+//	WORD wVersionRequested = MAKEWORD(2, 2);
+//	wsaerr = WSAStartup(wVersionRequested, &wsaData);
+//	if (wsaerr != 0) {
+//		std::cout << "The winsock dll not found!" << std::endl;
+//		return 0;
+//	}
+//	else {
+//		std::cout << "The winsock dll was found!" << "\n" << "The status: " << wsaData.szSystemStatus << std::endl;
+//	}
+//
+//	// set up the socket configuration
+//	SOCKET listener = INVALID_SOCKET;
+//	listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+//	if (listener == INVALID_SOCKET) {
+//		std::cout << "Error at socket(); " << WSAGetLastError() << std::endl;
+//		WSACleanup();
+//		return 0;
+//	}
+//	else {
+//		std::cout << "socket() is OK!" << std::endl;
+//	}
+//
+//	// Get the hostname of the current machine
+//	char hostname[256];
+//	if (gethostname(hostname, sizeof(hostname)) != 0) {
+//		std::cout << "gethostname failed" << std::endl;
+//		WSACleanup();
+//		return 0;
+//	}
+//
+//	// Get the IP address of the current machine
+//	struct addrinfo hints, * result, * ptr;
+//	ZeroMemory(&hints, sizeof(hints));
+//	hints.ai_family = AF_INET;
+//	hints.ai_socktype = SOCK_STREAM;
+//	hints.ai_flags = AI_PASSIVE;
+//
+//	if (getaddrinfo(hostname, NULL, &hints, &result) != 0) {
+//		std::cout << "getaddrinfo failed" << std::endl;
+//		WSACleanup();
+//		return 0;
+//	}
+//
+//	sockaddr_in service;
+//	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+//		if (ptr->ai_family == AF_INET) {
+//			service.sin_family = AF_INET;
+//			service.sin_addr = ((struct sockaddr_in*)ptr->ai_addr)->sin_addr;
+//			service.sin_port = htons(gPort);
+//			break;
+//		}
+//	}
+//
+//	freeaddrinfo(result);
+//
+//	// bind the specifics for the socket with its specific configuration
+//	if (bind(listener, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) {
+//		std::cout << "bind failed on listener" << WSAGetLastError() << std::endl;
+//		closesocket(listener);
+//		WSACleanup();
+//		return 0;
+//	}
+//	else {
+//		std::cout << "Socket bound!" << std::endl;
+//	}
+//
+//	if (listen(listener, 8) == SOCKET_ERROR) {
+//		std::cout << "listen(): Error listening on socket! " << WSAGetLastError() << std::endl;
+//		closesocket(listener);
+//		WSACleanup();
+//		return 0;
+//	}
+//	else {
+//		std::cout << "Socket now listening for incoming requests on port: " << gPort << std::endl;
+//	}
+//
+//	std::cout << "Waiting for client connection" << std::endl;
+//
+//	WSACleanup();
+//	return 0;
+//}
