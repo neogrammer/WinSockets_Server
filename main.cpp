@@ -368,40 +368,40 @@ std::cout << "Waiting for client connection" << std::endl;
 
 
 		// use input to update world
-		if (recvbuffP1[(int)InputType::Escape] == 1 || recvbuffP2[(int)InputType::Escape] == 1)
+		if (recvbuffP1[(int)InputType::Escape] == '1' || recvbuffP2[(int)InputType::Escape] == '1')
 			break;
 		dt = timer.restart().asSeconds();
-		if (recvbuffP1[(int)InputType::Right] == 1)
+		if (recvbuffP1[(int)InputType::Right] == '1')
 		{
 			p1Pos.x += 40.f * dt;
 		}
-		if (recvbuffP1[(int)InputType::Left] == 1)
+		if (recvbuffP1[(int)InputType::Left] == '1')
 		{
 			p1Pos.x -= 40.f * dt;
 		}
-		if (recvbuffP1[(int)InputType::Down] == 1)
+		if (recvbuffP1[(int)InputType::Down] == '1')
 		{
 			p1Pos.y += 40.f * dt;
 		}
-		if (recvbuffP1[(int)InputType::Up] == 1)
+		if (recvbuffP1[(int)InputType::Up] == '1')
 		{
 			p1Pos.y -= 40.f * dt;
 		}
 
 
-		if (recvbuffP2[(int)InputType::Right] == 1)
+		if (recvbuffP2[(int)InputType::Right] == '1')
 		{
 			p2Pos.x += 40.f * dt;
 		}
-		if (recvbuffP2[(int)InputType::Left] == 1)
+		if (recvbuffP2[(int)InputType::Left] == '1')
 		{
 			p2Pos.x -= 40.f * dt;
 		}
-		if (recvbuffP2[(int)InputType::Down] == 1)
+		if (recvbuffP2[(int)InputType::Down] == '1')
 		{
 			p2Pos.y += 40.f * dt;
 		}
-		if (recvbuffP2[(int)InputType::Up] == 1)
+		if (recvbuffP2[(int)InputType::Up] == '1')
 		{
 			p2Pos.y -= 40.f * dt;
 		}
