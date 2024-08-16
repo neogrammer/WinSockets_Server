@@ -239,7 +239,7 @@ std::cout << "Waiting for client connection" << std::endl;
 		ClientFrameInput tmp;
 
 		
-		int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+		int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
 		if (byteCount < 0)
 		{
 			std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
@@ -261,7 +261,7 @@ std::cout << "Waiting for client connection" << std::endl;
 	{
 		ClientFrameInput tmp2;
 		
-		int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+		int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
 		if (byteCount2 < 0)
 		{
 			std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
@@ -335,8 +335,8 @@ std::cout << "Waiting for client connection" << std::endl;
 			/// send the clients their clientIDs
 		
 			unsigned long long byteCount1 = 0Ui64;
-			while (byteCount1 < sizeof(data))
-				byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(data), 0);
+			while (byteCount1 < sizeof(combo))
+				byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(combo), 0);
 			if (byteCount1 == SOCKET_ERROR)
 			{
 				//printf("Server send error %d.\n", WSAGetLastError());
@@ -355,8 +355,8 @@ std::cout << "Waiting for client connection" << std::endl;
 			data.tmp2y = t2;
 		//	sf::Vector2f tmp2 = p2Pos;
 			unsigned long long byteCount2 = 0Ui64;
-			while (byteCount2 < sizeof(data))
-				byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(data), 0);
+			while (byteCount2 < sizeof(combo))
+				byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(combo), 0);
 			if (byteCount2 == SOCKET_ERROR)
 			{
 				//printf("Server send error %d.\n", WSAGetLastError());
@@ -375,7 +375,7 @@ std::cout << "Waiting for client connection" << std::endl;
 			ClientFrameInput tmp;
 
 			
-			int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+			int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
 			if (byteCount < 0)
 			{
 				std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
@@ -396,7 +396,7 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		{
 			ClientFrameInput tmp2;
-			int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+			int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
 			if (byteCount2 < 0)
 			{
 				std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
