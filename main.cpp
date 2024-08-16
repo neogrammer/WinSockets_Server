@@ -235,55 +235,134 @@ std::cout << "Waiting for client connection" << std::endl;
 	
 	player1.xpos = 40;
 	player2.xpos = 1510;*/
-	{
-		ClientFrameInput tmp;
 
-		
-		int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
-		if (byteCount < 0)
-		{
-			std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-			closesocket(clientPipeSocket2);
-			closesocket(clientPipeSocket);
+	//	// Send a response to the client
+	//	char buffer[8];
+	//	std::cout << "Enter the message: ";
+	//	buffer[0] = _itoa_s'1';
+	//	buffer[1] = '1';
+	//	buffer[2] = '1';
+	//	buffer[3] = '1';
+	//	buffer[4] = '1';
+	//	buffer[5] = '1';
+	//	buffer[6] = '1';
+	//	buffer[7] = '\0';
 
-			WSACleanup();
-			return 0;
-		}
-		p1Input.attack = tmp.attack;
-		p1Input.start = tmp.start;
-		p1Input.run = tmp.run;
-		p1Input.left = tmp.left;
-		p1Input.right = tmp.right;
-		p1Input.down = tmp.down;
-		p1Input.up = tmp.up;
-	}
+	//	111111\0';
+	//	int sbyteCount = send(clientPipeSocket, buffer, 200, 0);
+	//	if (sbyteCount == SOCKET_ERROR) {
+	//		std::cout << "Server send error: " << WSAGetLastError() << std::endl;
+	//		return -1;
+	//	}
+	//	else {
+	//		std::cout << "Server: Sent " << sbyteCount << " bytes" << std::endl;
+	//	}
 
-	{
-		ClientFrameInput tmp2;
-		
-		int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
-		if (byteCount2 < 0)
-		{
-			std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-			closesocket(clientPipeSocket2);
-			closesocket(clientPipeSocket);
+	//	// Receive data from the client
+	//	char receiveBuffer[200];
+	//	int rbyteCount = recv(acceptSocket, receiveBuffer, 200, 0);
+	//	if (rbyteCount < 0) {
+	//		std::cout << "Server recv error: " << WSAGetLastError() << std::endl;
+	//		return 0;
+	//	}
+	//	else {
+	//		std::cout << "Received data: " << receiveBuffer << std::endl;
+	//	}
 
-			WSACleanup();
-			return 0;
-		}
-		p2Input.attack = tmp2.attack;
-		p2Input.start = tmp2.start;
-		p2Input.run = tmp2.run;
-		p2Input.left = tmp2.left;
-		p2Input.right = tmp2.right;
-		p2Input.down = tmp2.down;
-		p2Input.up = tmp2.up;
-	}
+	//	
+	//	ClientFrameInput tmp;
+
+	//	
+	//	int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
+	//	if (byteCount < 0)
+	//	{
+	//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+	//		closesocket(clientPipeSocket2);
+	//		closesocket(clientPipeSocket);
+
+	//		WSACleanup();
+	//		return 0;
+	//	}
+	//	p1Input.attack = tmp.attack;
+	//	p1Input.start = tmp.start;
+	//	p1Input.run = tmp.run;
+	//	p1Input.left = tmp.left;
+	//	p1Input.right = tmp.right;
+	//	p1Input.down = tmp.down;
+	//	p1Input.up = tmp.up;
+	//}
+
+	//{
+	//	ClientFrameInput tmp2;
+	//	
+	//	int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
+	//	if (byteCount2 < 0)
+	//	{
+	//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+	//		closesocket(clientPipeSocket2);
+	//		closesocket(clientPipeSocket);
+
+	//		WSACleanup();
+	//		return 0;
+	//	}
+	//	p2Input.attack = tmp2.attack;
+	//	p2Input.start = tmp2.start;
+	//	p2Input.run = tmp2.run;
+	//	p2Input.left = tmp2.left;
+	//	p2Input.right = tmp2.right;
+	//	p2Input.down = tmp2.down;
+	//	p2Input.up = tmp2.up;
+	//}
 	float dt{ 0.f };
 	sf::Clock timer;
 	timer.restart();
 	while (true)
 	{
+
+		{
+
+			char recvbuff[27];
+			int ret, nLeft, idx;
+
+			nLeft = 27;
+			idx = 0;
+
+			while (nLeft > 0)
+			{
+				ret = recv(clientPipeSocket, &recvbuff[idx], nLeft, 0);
+				if (ret == SOCKET_ERROR)
+				{
+
+				}
+				idx += ret;
+				nLeft -= ret;
+			}
+			std::cout << "Got message from client 1" << std::endl;
+		}
+
+
+
+		{
+
+			char recvbuff[27];
+			int ret, nLeft, idx;
+
+			nLeft = 27;
+			idx = 0;
+
+			while (nLeft > 0)
+			{
+				ret = recv(clientPipeSocket2, &recvbuff[idx], nLeft, 0);
+				if (ret == SOCKET_ERROR)
+				{
+
+				}
+				idx += ret;
+				nLeft -= ret;
+			}
+			std::cout << "Got message from client 2" << std::endl;
+		}
+
 		// use input to update world
 		if (p1Input.start == 1 || p2Input.start == 1)
 			goto loopend;
@@ -322,98 +401,172 @@ std::cout << "Waiting for client connection" << std::endl;
 		{
 			p2Pos.y -= 40.f * dt;
 		}
+
+
+		{
+			std::string mystr = "This is a test from server";
+			const char* sendbuf = mystr.c_str();
+			int bytesSent{ 0 }, nlen{ 27 };
+
+			while (bytesSent < 27)
+			{
+				bytesSent = send(clientPipeSocket, const_cast<char*>(sendbuf), 27, 0);
+
+				if (bytesSent == SOCKET_ERROR)
+				{
+					std::cout << "server: send failed" << WSAGetLastError() << std::endl;
+				}
+				else
+				{
+					std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
+
+				}
+			}
+			std::cout << "server: sent message";
+			/*	else
+				{
+					std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
+					memset(&ThisSenderInfo, 0, sizeof(ThisSenderInfo));
+					nlen - sizeof(ThisSenderInfo);
+
+					getsockname(connSocket, (SOCKADDR*)&ThisSenderInfo, &nlen);
+
+				}*/
+
+
+
+
+		}
+
+		{
+			std::string mystr = "This is a test from server";
+			const char* sendbuf = mystr.c_str();
+			int bytesSent{ 0 }, nlen{ 27 };
+
+			while (bytesSent < 27)
+			{
+				bytesSent = send(clientPipeSocket2, const_cast<char*>(sendbuf), 27, 0);
+
+				if (bytesSent == SOCKET_ERROR)
+				{
+					std::cout << "server: send failed" << WSAGetLastError() << std::endl;
+				}
+				else
+				{
+					std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
+
+				}
+			}
+			std::cout << "server: sent message";
+			/*	else
+				{
+					std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
+					memset(&ThisSenderInfo, 0, sizeof(ThisSenderInfo));
+					nlen - sizeof(ThisSenderInfo);
+
+					getsockname(connSocket, (SOCKADDR*)&ThisSenderInfo, &nlen);
+
+				}*/
+
+
+
+
+		}
+
+
+
 		// pack new values into entities and send the data to each
 		
-		{
-			struct combo
-			{
-				float tmp1x{ 0.f }, tmp1y{ 0.f };
-				float tmp2x{ 0.f }, tmp2y{ 0.f };
-			};
+		//{
+		//	struct combo
+		//	{
+		//		float tmp1x{ 0.f }, tmp1y{ 0.f };
+		//		float tmp2x{ 0.f }, tmp2y{ 0.f };
+		//	};
 
-			combo data;
-			/// send the clients their clientIDs
-		
-			unsigned long long byteCount1 = 0Ui64;
-			while (byteCount1 < sizeof(combo))
-				byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(combo), 0);
-			if (byteCount1 == SOCKET_ERROR)
-			{
-				//printf("Server send error %d.\n", WSAGetLastError());
-				return -1;
-			}
-			else
-			{
-				//printf("Server: sent %ld bytes \n to player 1", byteCount1);
-			}
+		//	combo data;
+		//	/// send the clients their clientIDs
+		//
+		//	unsigned long long byteCount1 = 0Ui64;
+		//	while (byteCount1 < sizeof(combo))
+		//		byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(combo), 0);
+		//	if (byteCount1 == SOCKET_ERROR)
+		//	{
+		//		//printf("Server send error %d.\n", WSAGetLastError());
+		//		return -1;
+		//	}
+		//	else
+		//	{
+		//		//printf("Server: sent %ld bytes \n to player 1", byteCount1);
+		//	}
 
-			auto t = data.tmp1x;
-			data.tmp1x = data.tmp2x;
-			data.tmp2x = t;
-			auto t2 = data.tmp1y;
-			data.tmp1y = data.tmp2y;
-			data.tmp2y = t2;
-		//	sf::Vector2f tmp2 = p2Pos;
-			unsigned long long byteCount2 = 0Ui64;
-			while (byteCount2 < sizeof(combo))
-				byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(combo), 0);
-			if (byteCount2 == SOCKET_ERROR)
-			{
-				//printf("Server send error %d.\n", WSAGetLastError());
-				return -1;
-			}
-			else
-			{
-				//printf("Server: sent %ld bytes \n to player 2", byteCount2);
-			}
-		}
+		//	auto t = data.tmp1x;
+		//	data.tmp1x = data.tmp2x;
+		//	data.tmp2x = t;
+		//	auto t2 = data.tmp1y;
+		//	data.tmp1y = data.tmp2y;
+		//	data.tmp2y = t2;
+		////	sf::Vector2f tmp2 = p2Pos;
+		//	unsigned long long byteCount2 = 0Ui64;
+		//	while (byteCount2 < sizeof(combo))
+		//		byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(combo), 0);
+		//	if (byteCount2 == SOCKET_ERROR)
+		//	{
+		//		//printf("Server send error %d.\n", WSAGetLastError());
+		//		return -1;
+		//	}
+		//	else
+		//	{
+		//		//printf("Server: sent %ld bytes \n to player 2", byteCount2);
+		//	}
+		//}
 
-		
+		//
 
-		// collect input
-		{
-			ClientFrameInput tmp;
+		//// collect input
+		//{
+		//	ClientFrameInput tmp;
 
-			
-			int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
-			if (byteCount < 0)
-			{
-				std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-				closesocket(clientPipeSocket);
-				closesocket(clientPipeSocket2);
+		//	
+		//	int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
+		//	if (byteCount < 0)
+		//	{
+		//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+		//		closesocket(clientPipeSocket);
+		//		closesocket(clientPipeSocket2);
 
-				WSACleanup();
-				return 0;
-			}
-			p1Input.attack = tmp.attack;
-			p1Input.start = tmp.start;
-			p1Input.run = tmp.run;
-			p1Input.left = tmp.left;
-			p1Input.right = tmp.right;
-			p1Input.down = tmp.down;
-			p1Input.up = tmp.up;
-		}
+		//		WSACleanup();
+		//		return 0;
+		//	}
+		//	p1Input.attack = tmp.attack;
+		//	p1Input.start = tmp.start;
+		//	p1Input.run = tmp.run;
+		//	p1Input.left = tmp.left;
+		//	p1Input.right = tmp.right;
+		//	p1Input.down = tmp.down;
+		//	p1Input.up = tmp.up;
+		//}
 
-		{
-			ClientFrameInput tmp2;
-			int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
-			if (byteCount2 < 0)
-			{
-				std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-				closesocket(clientPipeSocket2);
-				closesocket(clientPipeSocket);
+		//{
+		//	ClientFrameInput tmp2;
+		//	int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
+		//	if (byteCount2 < 0)
+		//	{
+		//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+		//		closesocket(clientPipeSocket2);
+		//		closesocket(clientPipeSocket);
 
-				WSACleanup();
-				return 0;
-			}
-			p2Input.attack = tmp2.attack;
-			p2Input.start = tmp2.start;
-			p2Input.run = tmp2.run;
-			p2Input.left = tmp2.left;
-			p2Input.right = tmp2.right;
-			p2Input.down = tmp2.down;
-			p2Input.up = tmp2.up;
-		}
+		//		WSACleanup();
+		//		return 0;
+		//	}
+		//	p2Input.attack = tmp2.attack;
+		//	p2Input.start = tmp2.start;
+		//	p2Input.run = tmp2.run;
+		//	p2Input.left = tmp2.left;
+		//	p2Input.right = tmp2.right;
+		//	p2Input.down = tmp2.down;
+		//	p2Input.up = tmp2.up;
+		//}
 
 
 		//int readBytes = 0;
