@@ -182,7 +182,9 @@ std::cout << "Waiting for client connection" << std::endl;
 		char buffer1[2] = { '1','\0' };
 		char buffer2[2] = { '2','\0' };
 		sf::Vector2f tmp1 = p1Pos;
-		int byteCount1 = send(clientPipeSocket, (char*)&tmp1, sizeof(tmp1), 0);
+		unsigned long long byteCount1 = 0Ui64;
+		while (byteCount1 < sizeof(tmp1))
+			byteCount1 = send(clientPipeSocket, (char*)&tmp1, sizeof(tmp1), 0);
 		if (byteCount1 == SOCKET_ERROR)
 		{
 			printf("Server send error %d.\n", WSAGetLastError());
@@ -190,20 +192,22 @@ std::cout << "Waiting for client connection" << std::endl;
 		}
 		else
 		{
-			printf("Server: sent %ld bytes \n to player 1", byteCount1);
+			//printf("Server: sent %ld bytes \n to player 1", byteCount1);
 		}
 
 
 		sf::Vector2f tmp2 = p2Pos;
-		int byteCount2 = send(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+		unsigned long long byteCount2 = 0Ui64;
+		while (byteCount2 < sizeof(tmp2))
+			byteCount2 = send(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
 		if (byteCount2 == SOCKET_ERROR)
 		{
-			printf("Server send error %d.\n", WSAGetLastError());
+			//printf("Server send error %d.\n", WSAGetLastError());
 			return -1;
 		}
 		else
 		{
-			printf("Server: sent %ld bytes \n to player 2", byteCount2);
+			//printf("Server: sent %ld bytes \n to player 2", byteCount2);
 		}
 	}
 	//message "3803800785435" -> out
@@ -234,9 +238,17 @@ std::cout << "Waiting for client connection" << std::endl;
 	{
 		ClientFrameInput tmp;
 
-		unsigned long long byteCount = 0Ui64;
-		while (byteCount < sizeof(tmp))
-			byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+		
+		int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+		if (byteCount < 0)
+		{
+			std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+			closesocket(clientPipeSocket2);
+			closesocket(clientPipeSocket);
+
+			WSACleanup();
+			return 0;
+		}
 		p1Input.attack = tmp.attack;
 		p1Input.start = tmp.start;
 		p1Input.run = tmp.run;
@@ -248,9 +260,17 @@ std::cout << "Waiting for client connection" << std::endl;
 
 	{
 		ClientFrameInput tmp2;
-		unsigned long long byteCount2 = 0Ui64;
-		while (byteCount2 < sizeof(tmp2))
-			byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+		
+		int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+		if (byteCount2 < 0)
+		{
+			std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+			closesocket(clientPipeSocket2);
+			closesocket(clientPipeSocket);
+
+			WSACleanup();
+			return 0;
+		}
 		p2Input.attack = tmp2.attack;
 		p2Input.start = tmp2.start;
 		p2Input.run = tmp2.run;
@@ -313,31 +333,34 @@ std::cout << "Waiting for client connection" << std::endl;
 			/// send the clients their clientIDs
 			char buffer1[2] = { '1','\0' };
 			char buffer2[2] = { '2','\0' };
-			
-			int byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(data), 0);
+			unsigned long long byteCount1 = 0Ui64;
+			while (byteCount1 < sizeof(data))
+				byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(data), 0);
 			if (byteCount1 == SOCKET_ERROR)
 			{
-				printf("Server send error %d.\n", WSAGetLastError());
+				//printf("Server send error %d.\n", WSAGetLastError());
 				return -1;
 			}
 			else
 			{
-				printf("Server: sent %ld bytes \n to player 1", byteCount1);
+				//printf("Server: sent %ld bytes \n to player 1", byteCount1);
 			}
 
 			auto t = data.tmp1;
 			data.tmp1 = data.tmp2;
 			data.tmp2 = t;
 			sf::Vector2f tmp2 = p2Pos;
-			int byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(data), 0);
+			unsigned long long byteCount2 = 0Ui64;
+			while (byteCount2 < sizeof(data))
+				byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(data), 0);
 			if (byteCount2 == SOCKET_ERROR)
 			{
-				printf("Server send error %d.\n", WSAGetLastError());
+				//printf("Server send error %d.\n", WSAGetLastError());
 				return -1;
 			}
 			else
 			{
-				printf("Server: sent %ld bytes \n to player 2", byteCount2);
+				//printf("Server: sent %ld bytes \n to player 2", byteCount2);
 			}
 		}
 
@@ -347,9 +370,17 @@ std::cout << "Waiting for client connection" << std::endl;
 		{
 			ClientFrameInput tmp;
 
-			unsigned long long byteCount = 0Ui64;
-			while (byteCount < sizeof(tmp))
-				byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+			
+			int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+			if (byteCount < 0)
+			{
+				std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+				closesocket(clientPipeSocket);
+				closesocket(clientPipeSocket2);
+
+				WSACleanup();
+				return 0;
+			}
 			p1Input.attack = tmp.attack;
 			p1Input.start = tmp.start;
 			p1Input.run = tmp.run;
@@ -361,9 +392,16 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		{
 			ClientFrameInput tmp2;
-			unsigned long long byteCount2 = 0Ui64;
-			while (byteCount2 < sizeof(tmp2))
-				byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+			int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+			if (byteCount2 < 0)
+			{
+				std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
+				closesocket(clientPipeSocket2);
+				closesocket(clientPipeSocket);
+
+				WSACleanup();
+				return 0;
+			}
 			p2Input.attack = tmp2.attack;
 			p2Input.start = tmp2.start;
 			p2Input.run = tmp2.run;
