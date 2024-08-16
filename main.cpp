@@ -254,7 +254,7 @@ std::cout << "Waiting for client connection" << std::endl;
 	while (true)
 	{
 		// use input to update world
-		if (p1Input.left == true || p2Input.left == true)
+		if (p1Input.left == 1 || p2Input.left == 1)
 			goto loopend;
 		// pack new values into entities and send the data to each
 		
