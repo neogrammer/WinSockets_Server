@@ -183,8 +183,8 @@ std::cout << "Waiting for client connection" << std::endl;
 		char buffer2[2] = { '2','\0' };
 		sf::Vector2f tmp1 = p1Pos;
 		unsigned long long byteCount1 = 0Ui64;
-		while (byteCount1 < sizeof(tmp1))
-			byteCount1 = send(clientPipeSocket, (char*)&tmp1, sizeof(tmp1), 0);
+		while (byteCount1 < sizeof(buffer1))
+			byteCount1 = send(clientPipeSocket, (char*)&buffer1, sizeof(buffer1), 0);
 		if (byteCount1 == SOCKET_ERROR)
 		{
 			printf("Server send error %d.\n", WSAGetLastError());
@@ -198,8 +198,8 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		sf::Vector2f tmp2 = p2Pos;
 		unsigned long long byteCount2 = 0Ui64;
-		while (byteCount2 < sizeof(tmp2))
-			byteCount2 = send(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+		while (byteCount2 < sizeof(buffer2))
+			byteCount2 = send(clientPipeSocket2, (char*)&buffer2, sizeof(buffer2), 0);
 		if (byteCount2 == SOCKET_ERROR)
 		{
 			//printf("Server send error %d.\n", WSAGetLastError());
