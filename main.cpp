@@ -319,49 +319,50 @@ std::cout << "Waiting for client connection" << std::endl;
 	while (true)
 	{
 
-		
 
-			char recvbuffP1[9];
-			int ret, nLeft, idx;
 
-			nLeft = 9;
-			idx = 0;
+		char recvbuffP1[9];
+		int ret, nLeft, idx;
 
-			while (nLeft > 0)
+		nLeft = 9;
+		idx = 0;
+
+		while (nLeft > 0)
+		{
+			ret = recv(clientPipeSocket, &recvbuffP1[idx], nLeft, 0);
+			if (ret == SOCKET_ERROR)
 			{
-				ret = recv(clientPipeSocket, &recvbuffP1[idx], nLeft, 0);
-				if (ret == SOCKET_ERROR)
-				{
 
-				}
-				idx += ret;
-				nLeft -= ret;
 			}
-			std::cout << "Got message from client 1 " << recvbuffP1 << std::endl;
-		
+			idx += ret;
+			nLeft -= ret;
+		}
+		std::cout << "Got message from client 1 " << recvbuffP1 << std::endl;
 
 
 
-		
 
-			char recvbuffP2[9];
-			int ret2, nLeft2, idx2;
 
-			nLeft2 = 9;
-			idx2 = 0;
 
-			while (nLeft2 > 0)
+		char recvbuffP2[9];
+		int ret2, nLeft2, idx2;
+
+		nLeft2 = 9;
+		idx2 = 0;
+
+		while (nLeft2 > 0)
+		{
+			ret2 = recv(clientPipeSocket2, &recvbuffP2[idx2], nLeft2, 0);
+
+			if (ret2 == SOCKET_ERROR)
 			{
-				ret2 = recv(clientPipeSocket2, &recvbuffP2[idx2], nLeft2, 0);
-				if (ret2 == SOCKET_ERROR)
-				{
 
-				}
-				idx2 += ret2;
-				nLeft2 -= ret2;
 			}
-			std::cout << "Got message from client 2: " << recvbuffP2 << std::endl;
-		
+			idx2 += ret2;
+			nLeft2 -= ret2;
+		}
+		std::cout << "Got message from client 2: " << recvbuffP2 << std::endl;
+
 
 		// use input to update world
 		if (recvbuffP1[(int)InputType::Escape] == 1 || recvbuffP2[(int)InputType::Escape] == 1)
@@ -409,44 +410,44 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		std::string mystr = posXP1 + posYP1 + posXP2 + posYP2;
 
-			
-			const char* sendbuf = mystr.c_str();
-			int bytesSent{ 0 }, nlen{ 15 };
+		mystr[14] = '\0';
+		const char* sendbuf = mystr.c_str();
+		int bytesSent{ 0 }, nlen{ 15 };
 
-			while (bytesSent < 15)
+		while (bytesSent < 15)
+		{
+			bytesSent = send(clientPipeSocket, const_cast<char*>(sendbuf), 15, 0);
+
+			if (bytesSent == SOCKET_ERROR)
 			{
-				bytesSent = send(clientPipeSocket, const_cast<char*>(sendbuf), 15, 0);
-
-				if (bytesSent == SOCKET_ERROR)
-				{
-					std::cout << "server: send failed" << WSAGetLastError() << std::endl;
-				}
-				else
-				{
-					//std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
-
-				}
+				std::cout << "server: send failed" << WSAGetLastError() << std::endl;
 			}
-			//std::cout << "server: sent message";
-			/*	else
-				{
-					std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
-					memset(&ThisSenderInfo, 0, sizeof(ThisSenderInfo));
-					nlen - sizeof(ThisSenderInfo);
+			else
+			{
+				//std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
 
-					getsockname(connSocket, (SOCKADDR*)&ThisSenderInfo, &nlen);
+			}
+		}
+		//std::cout << "server: sent message";
+		/*	else
+			{
+				std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
+				memset(&ThisSenderInfo, 0, sizeof(ThisSenderInfo));
+				nlen - sizeof(ThisSenderInfo);
 
-				}*/
+				getsockname(connSocket, (SOCKADDR*)&ThisSenderInfo, &nlen);
+
+			}*/
 
 
 
 
-		
 
-		
-		
-			std::string mystr2 = posXP1 + posYP1 + posXP2 + posYP2;
-			
+
+
+
+		std::string mystr2 = posXP1 + posYP1 + posXP2 + posYP2;
+		mystr2[14] = '\0';
 			const char* sendbuf2 = mystr2.c_str();
 			int bytesSent2{ 0 }, nlen2{ 15 };
 
