@@ -4,6 +4,13 @@
 #include <iostream>
 #include <string>
 #include <interrelated.h>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/System/Clock.hpp>
+sf::Vector2f p1Pos{ 30.f,700.f };
+sf::Vector2f p2Pos{ 150.f,700.f };
+
+
+
 
 //
 //struct PlayerData
@@ -174,7 +181,8 @@ std::cout << "Waiting for client connection" << std::endl;
 		/// send the clients their clientIDs
 		char buffer1[2] = { '1','\0' };
 		char buffer2[2] = { '2','\0' };
-		int byteCount1 = send(clientPipeSocket, buffer1, 2, 0);
+		sf::Vector2f tmp1 = p1Pos;
+		int byteCount1 = send(clientPipeSocket, (char*)&tmp1, sizeof(tmp1), 0);
 		if (byteCount1 == SOCKET_ERROR)
 		{
 			printf("Server send error %d.\n", WSAGetLastError());
@@ -186,8 +194,8 @@ std::cout << "Waiting for client connection" << std::endl;
 		}
 
 
-
-		int byteCount2 = send(clientPipeSocket2, buffer2, 2, 0);
+		sf::Vector2f tmp2 = p2Pos;
+		int byteCount2 = send(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
 		if (byteCount2 == SOCKET_ERROR)
 		{
 			printf("Server send error %d.\n", WSAGetLastError());
@@ -251,19 +259,62 @@ std::cout << "Waiting for client connection" << std::endl;
 		p2Input.down = tmp2.down;
 		p2Input.up = tmp2.up;
 	}
+	float dt{ 0.f };
+	sf::Clock timer;
+	timer.restart();
 	while (true)
 	{
 		// use input to update world
-		if (p1Input.left == 1 || p2Input.left == 1)
+		if (p1Input.start == 1 || p2Input.start == 1)
 			goto loopend;
+		dt = timer.restart().asSeconds();
+		if (p1Input.right == 1)
+		{
+			p1Pos.x += 40.f * dt;
+		}
+		if (p1Input.left == 1)
+		{
+			p1Pos.x -= 40.f * dt;
+		}
+		if (p1Input.up == 1)
+		{
+			p1Pos.y += 40.f * dt;
+		}
+		if (p1Input.down == 1)
+		{
+			p1Pos.y -= 40.f * dt;
+		}
+
+
+		if (p2Input.right == 1)
+		{
+			p2Pos.x += 40.f * dt;
+		}
+		if (p2Input.left == 1)
+		{
+			p2Pos.x -= 40.f * dt;
+		}
+		if (p2Input.up == 1)
+		{
+			p2Pos.y += 40.f * dt;
+		}
+		if (p2Input.down == 1)
+		{
+			p2Pos.y -= 40.f * dt;
+		}
 		// pack new values into entities and send the data to each
 		
-
 		{
+			struct combo
+			{
+				sf::Vector2f tmp1{ p1Pos };
+				sf::Vector2f tmp2{ p2Pos };
+			} data;
 			/// send the clients their clientIDs
 			char buffer1[2] = { '1','\0' };
 			char buffer2[2] = { '2','\0' };
-			int byteCount1 = send(clientPipeSocket, buffer1, 2, 0);
+			
+			int byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(data), 0);
 			if (byteCount1 == SOCKET_ERROR)
 			{
 				printf("Server send error %d.\n", WSAGetLastError());
@@ -274,9 +325,11 @@ std::cout << "Waiting for client connection" << std::endl;
 				printf("Server: sent %ld bytes \n to player 1", byteCount1);
 			}
 
-
-
-			int byteCount2 = send(clientPipeSocket2, buffer2, 2, 0);
+			auto t = data.tmp1;
+			data.tmp1 = data.tmp2;
+			data.tmp2 = t;
+			sf::Vector2f tmp2 = p2Pos;
+			int byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(data), 0);
 			if (byteCount2 == SOCKET_ERROR)
 			{
 				printf("Server send error %d.\n", WSAGetLastError());
@@ -287,6 +340,8 @@ std::cout << "Waiting for client connection" << std::endl;
 				printf("Server: sent %ld bytes \n to player 2", byteCount2);
 			}
 		}
+
+		
 
 		// collect input
 		{
