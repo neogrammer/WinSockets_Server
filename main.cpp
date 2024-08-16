@@ -314,6 +314,9 @@ std::cout << "Waiting for client connection" << std::endl;
 	//	p2Input.up = tmp2.up;
 	//}
 	float dt{ 0.f };
+	sf::Vector2f p1Pos{ 50.f, 600.f };
+
+	sf::Vector2f p2Pos{ 350.f, 600.f };
 	sf::Clock timer;
 	timer.restart();
 	while (true)
@@ -366,7 +369,7 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		// use input to update world
 		if (recvbuffP1[(int)InputType::Escape] == 1 || recvbuffP2[(int)InputType::Escape] == 1)
-			goto loopend;
+			break;
 		dt = timer.restart().asSeconds();
 		if (recvbuffP1[(int)InputType::Right] == 1)
 		{
@@ -403,10 +406,10 @@ std::cout << "Waiting for client connection" << std::endl;
 			p2Pos.y -= 40.f * dt;
 		}
 
-		std::string posXP1 = ((std::to_string(p1Pos.x).length() == 4) ? std::to_string(p1Pos.x) : (std::to_string(p1Pos.x).length() == 3) ? "0" + std::to_string(p1Pos.x) : (std::to_string(p1Pos.x).length() == 2) ? "00" + std::to_string(p1Pos.x) : "000" + std::to_string(p1Pos.x));
-		std::string posYP1 = ((std::to_string(p1Pos.y).length() == 3) ? std::to_string(p1Pos.y) : (std::to_string(p1Pos.y).length() == 2) ? "0" + std::to_string(p1Pos.y) : "00" + std::to_string(p1Pos.y));
-		std::string posXP2 = ((std::to_string(p2Pos.x).length() == 4) ? std::to_string(p2Pos.x) : (std::to_string(p2Pos.x).length() == 3) ? "0" + std::to_string(p2Pos.x) : (std::to_string(p2Pos.x).length() == 2) ? "00" + std::to_string(p2Pos.x) : "000" + std::to_string(p2Pos.x));
-		std::string posYP2 = ((std::to_string(p2Pos.y).length() == 3) ? std::to_string(p2Pos.y) : (std::to_string(p2Pos.y).length() == 2) ? "0" + std::to_string(p2Pos.y) : "00" + std::to_string(p2Pos.y));
+		std::string posXP1 = ((std::to_string((int)p1Pos.x).length() == 4) ? std::to_string((int)p1Pos.x) : (std::to_string((int)p1Pos.x).length() == 3) ? "0" + std::to_string((int)p1Pos.x) : (std::to_string((int)p1Pos.x).length() == 2) ? "00" + std::to_string((int)p1Pos.x) : "000" + std::to_string((int)p1Pos.x));
+		std::string posYP1 = ((std::to_string((int)p1Pos.y).length() == 3) ? std::to_string((int)p1Pos.y) : (std::to_string((int)p1Pos.y).length() == 2) ? "0" + std::to_string((int)p1Pos.y) : "00" + std::to_string((int)p1Pos.y));
+		std::string posXP2 = ((std::to_string((int)p2Pos.x).length() == 4) ? std::to_string((int)p2Pos.x) : (std::to_string((int)p2Pos.x).length() == 3) ? "0" + std::to_string((int)p2Pos.x) : (std::to_string((int)p2Pos.x).length() == 2) ? "00" + std::to_string((int)p2Pos.x) : "000" + std::to_string((int)p2Pos.x));
+		std::string posYP2 = ((std::to_string((int)p2Pos.y).length() == 3) ? std::to_string((int)p2Pos.y) : (std::to_string((int)p2Pos.y).length() == 2) ? "0" + std::to_string((int)p2Pos.y) : "00" + std::to_string((int)p2Pos.y));
 
 		std::string mystr = posXP1 + posYP1 + posXP2 + posYP2;
 
