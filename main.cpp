@@ -3,6 +3,7 @@
 #include <Ws2tcpip.h>
 #include <iostream>
 #include <string>
+#include <interrelated.h>
 
 //
 //struct PlayerData
@@ -45,6 +46,8 @@ int numPlayersConnected = 0;
 //BallData ball{};
 //
 
+ClientFrameInput p1Input{};
+ClientFrameInput p2Input{};
 
 void update();
 
@@ -167,31 +170,34 @@ std::cout << "Waiting for client connection" << std::endl;
 		numPlayersConnected++;
 	}
 
+	{
+		/// send the clients their clientIDs
+		char buffer1[2] = { '1','\0' };
+		char buffer2[2] = { '2','\0' };
+		int byteCount1 = send(clientPipeSocket, buffer1, 2, 0);
+		if (byteCount1 == SOCKET_ERROR)
+		{
+			printf("Server send error %d.\n", WSAGetLastError());
+			return -1;
+		}
+		else
+		{
+			printf("Server: sent %ld bytes \n to player 1", byteCount1);
+		}
 
-	/// send the clients their clientIDs
-	char buffer1[2] = { '1','\0' };
-	char buffer2[2] = { '2','\0' };
-	int byteCount1 = send(clientPipeSocket, buffer1, 2, 0);
-	if (byteCount1 == SOCKET_ERROR)
-	{
-		printf("Server send error %d.\n", WSAGetLastError());
-		return -1;
-	}
-	else
-	{
-		printf("Server: sent %ld bytes \n to player 1", byteCount1);
-	}
-	int byteCount2 = send(clientPipeSocket2, buffer2, 2, 0);
-	if (byteCount2 == SOCKET_ERROR)
-	{
-		printf("Server send error %d.\n", WSAGetLastError());
-		return -1;
-	}
-	else
-	{
-		printf("Server: sent %ld bytes \n to player 2", byteCount2);
-	}
 
+
+		int byteCount2 = send(clientPipeSocket2, buffer2, 2, 0);
+		if (byteCount2 == SOCKET_ERROR)
+		{
+			printf("Server send error %d.\n", WSAGetLastError());
+			return -1;
+		}
+		else
+		{
+			printf("Server: sent %ld bytes \n to player 2", byteCount2);
+		}
+	}
 	//message "3803800785435" -> out
 	// message "380"  <- in  for each client
 
@@ -217,9 +223,102 @@ std::cout << "Waiting for client connection" << std::endl;
 	
 	player1.xpos = 40;
 	player2.xpos = 1510;*/
+	{
+		ClientFrameInput tmp;
 
+		unsigned long long byteCount = 0Ui64;
+		while (byteCount < sizeof(tmp))
+			byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+		p1Input.attack = tmp.attack;
+		p1Input.start = tmp.start;
+		p1Input.run = tmp.run;
+		p1Input.left = tmp.left;
+		p1Input.right = tmp.right;
+		p1Input.down = tmp.down;
+		p1Input.up = tmp.up;
+	}
+
+	{
+		ClientFrameInput tmp2;
+		unsigned long long byteCount2 = 0Ui64;
+		while (byteCount2 < sizeof(tmp2))
+			byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+		p2Input.attack = tmp2.attack;
+		p2Input.start = tmp2.start;
+		p2Input.run = tmp2.run;
+		p2Input.left = tmp2.left;
+		p2Input.right = tmp2.right;
+		p2Input.down = tmp2.down;
+		p2Input.up = tmp2.up;
+	}
 	while (true)
 	{
+		// use input to update world
+		if (p1Input.left == true || p2Input.left == true)
+			goto loopend;
+		// pack new values into entities and send the data to each
+		
+
+		{
+			/// send the clients their clientIDs
+			char buffer1[2] = { '1','\0' };
+			char buffer2[2] = { '2','\0' };
+			int byteCount1 = send(clientPipeSocket, buffer1, 2, 0);
+			if (byteCount1 == SOCKET_ERROR)
+			{
+				printf("Server send error %d.\n", WSAGetLastError());
+				return -1;
+			}
+			else
+			{
+				printf("Server: sent %ld bytes \n to player 1", byteCount1);
+			}
+
+
+
+			int byteCount2 = send(clientPipeSocket2, buffer2, 2, 0);
+			if (byteCount2 == SOCKET_ERROR)
+			{
+				printf("Server send error %d.\n", WSAGetLastError());
+				return -1;
+			}
+			else
+			{
+				printf("Server: sent %ld bytes \n to player 2", byteCount2);
+			}
+		}
+
+		// collect input
+		{
+			ClientFrameInput tmp;
+
+			unsigned long long byteCount = 0Ui64;
+			while (byteCount < sizeof(tmp))
+				byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(tmp), 0);
+			p1Input.attack = tmp.attack;
+			p1Input.start = tmp.start;
+			p1Input.run = tmp.run;
+			p1Input.left = tmp.left;
+			p1Input.right = tmp.right;
+			p1Input.down = tmp.down;
+			p1Input.up = tmp.up;
+		}
+
+		{
+			ClientFrameInput tmp2;
+			unsigned long long byteCount2 = 0Ui64;
+			while (byteCount2 < sizeof(tmp2))
+				byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(tmp2), 0);
+			p2Input.attack = tmp2.attack;
+			p2Input.start = tmp2.start;
+			p2Input.run = tmp2.run;
+			p2Input.left = tmp2.left;
+			p2Input.right = tmp2.right;
+			p2Input.down = tmp2.down;
+			p2Input.up = tmp2.up;
+		}
+
+
 		//int readBytes = 0;
 		//char readBuffer[4];
 		//readBytes = recv(clientPipeSocket, readBuffer, 4, 0);

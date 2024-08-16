@@ -2,5 +2,46 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Cfg.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="rec.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="interrelated.h" />
+    <ClInclude Include="serverspecific.h" />
+    <ClInclude Include="Cfg.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="rec.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="olcUTIL_Geometry2D.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{5db808be-ec0c-4ed8-86f4-21b5f89af1cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\tpl">
+      <UniqueIdentifier>{71752b70-bedc-4d3f-8794-f78282b1c13a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tpl\ResourceManager.tpl">
+      <Filter>core\tpl</Filter>
+    </None>
   </ItemGroup>
 </Project>
