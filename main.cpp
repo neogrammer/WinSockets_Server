@@ -337,7 +337,7 @@ std::cout << "Waiting for client connection" << std::endl;
 				idx += ret;
 				nLeft -= ret;
 			}
-			std::cout << "Got message from client 1" << std::endl;
+			std::cout << "Got message from client 1 " << recvbuff << std::endl;
 		}
 
 
@@ -360,7 +360,7 @@ std::cout << "Waiting for client connection" << std::endl;
 				idx += ret;
 				nLeft -= ret;
 			}
-			std::cout << "Got message from client 2" << std::endl;
+			std::cout << "Got message from client 2: " << recvbuff << std::endl;
 		}
 
 		// use input to update world
@@ -418,11 +418,11 @@ std::cout << "Waiting for client connection" << std::endl;
 				}
 				else
 				{
-					std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
+					//std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
 
 				}
 			}
-			std::cout << "server: sent message";
+			//std::cout << "server: sent message";
 			/*	else
 				{
 					std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
@@ -453,11 +453,11 @@ std::cout << "Waiting for client connection" << std::endl;
 				}
 				else
 				{
-					std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
+					//std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
 
 				}
 			}
-			std::cout << "server: sent message";
+			//std::cout << "server: sent message";
 			/*	else
 				{
 					std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
