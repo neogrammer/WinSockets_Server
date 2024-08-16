@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\AUStudent\source\repos\neogrammer\WinSockets_Server;C:\sdks\sfml_64\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);C:\sdks\sfml_64\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\sdks\sfml_64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
