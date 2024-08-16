@@ -327,12 +327,13 @@ std::cout << "Waiting for client connection" << std::endl;
 		{
 			struct combo
 			{
-				sf::Vector2f tmp1{ p1Pos };
-				sf::Vector2f tmp2{ p2Pos };
-			} data;
+				float tmp1x{ 0.f }, tmp1y{ 0.f };
+				float tmp2x{ 0.f }, tmp2y{ 0.f };
+			};
+
+			combo data;
 			/// send the clients their clientIDs
-			char buffer1[2] = { '1','\0' };
-			char buffer2[2] = { '2','\0' };
+		
 			unsigned long long byteCount1 = 0Ui64;
 			while (byteCount1 < sizeof(data))
 				byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(data), 0);
@@ -346,10 +347,13 @@ std::cout << "Waiting for client connection" << std::endl;
 				//printf("Server: sent %ld bytes \n to player 1", byteCount1);
 			}
 
-			auto t = data.tmp1;
-			data.tmp1 = data.tmp2;
-			data.tmp2 = t;
-			sf::Vector2f tmp2 = p2Pos;
+			auto t = data.tmp1x;
+			data.tmp1x = data.tmp2x;
+			data.tmp2x = t;
+			auto t2 = data.tmp1y;
+			data.tmp1y = data.tmp2y;
+			data.tmp2y = t2;
+		//	sf::Vector2f tmp2 = p2Pos;
 			unsigned long long byteCount2 = 0Ui64;
 			while (byteCount2 < sizeof(data))
 				byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(data), 0);
