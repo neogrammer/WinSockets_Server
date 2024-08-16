@@ -18,4 +18,9 @@ struct ClientFrameInput
 	int attack, run, start;
 };
 
+enum class InputType : int
+{
+	Up = 0, Down = 1, Left = 2, Right = 3, Attack = 4, Run = 5, Start = 6, Escape = 7, Count = 8,
+};
+
 #endif
