@@ -228,25 +228,23 @@ int main()
 //		numPlayersConnected++;
 //	}
 	{
-		char buffer[256];
+		/*char buffer[256];
 		strcpy_s(buffer, "Hello world from client!\0");
-		int bytesSent = 0;
 		cid::CResult result = cid::CResult::C_Success;
 		while (result == cid::CResult::C_Success)
 		{
-			result = clientPipeSocket.Send(buffer, 256, bytesSent);
+			result = clientPipeSocket.SendAll(buffer, 256);
 			std::cout  << "Attempting to send chunk of data..." << std::endl;
-			Sleep(500);
-		}
+		}*/
 	}
 	{
 	
 	}
 	{
 		/// send the clients their clientIDs
-		char buffer1[2] = { '1','\0' };
-		char buffer2[2] = { '2','\0' };
-		sf::Vector2f tmp1 = p1Pos;
+		char buffer1[2];
+		char buffer2[2];
+		/*sf::Vector2f tmp1 = p1Pos;
 		unsigned long long byteCount1 = 0Ui64;
 		while (byteCount1 < sizeof(buffer1))
 			byteCount1 = send(clientPipeSocket.GetHandle(), (char*)&buffer1, sizeof(buffer1), 0);
@@ -254,18 +252,47 @@ int main()
 		{
 			printf("Server send error %d.\n", WSAGetLastError());
 			return -1;
-		}
+		}*/
 		
-
-
-		sf::Vector2f tmp2 = p2Pos;
-		unsigned long long byteCount2 = 0Ui64;
-		while (byteCount2 < sizeof(buffer2))
-			byteCount2 = send(clientPipeSocket2.GetHandle(), (char*)&buffer2, sizeof(buffer2), 0);
-		if (byteCount2 == SOCKET_ERROR)
+		strcpy_s(buffer1, "1\0");
+		strcpy_s(buffer2, "2\0");
 		{
-			return -1;
+			cid::CResult result = cid::CResult::C_Success;
+			
+				result = clientPipeSocket.SendAll(buffer1, 2);
+				if (result != cid::CResult::C_Success)
+				{
+					clientPipeSocket.Close();
+					clientPipeSocket2.Close();
+					listener.Close();
+					cid::net::shutdown();
+					return 1;
+				}
 		}
+
+		{
+			cid::CResult result = cid::CResult::C_Success;
+		
+				result = clientPipeSocket2.SendAll(buffer2, 2);
+				if (result != cid::CResult::C_Success)
+				{
+					clientPipeSocket.Close();
+					clientPipeSocket2.Close();
+					listener.Close();
+					cid::net::shutdown();
+					return 1;
+				}
+			
+		}
+
+		//sf::Vector2f tmp2 = p2Pos;
+		//unsigned long long byteCount2 = 0Ui64;
+		//while (byteCount2 < sizeof(buffer2))
+		//	byteCount2 = send(clientPipeSocket2.GetHandle(), (char*)&buffer2, sizeof(buffer2), 0);
+		//if (byteCount2 == SOCKET_ERROR)
+		//{
+		//	return -1;
+		//}
 	}
 
 	float dt{ 0.f };
@@ -276,8 +303,26 @@ int main()
 	timer.restart();
 	while (true)
 	{
+		std::cout << "about to recevie the input data from client1" << std::endl;
 
-		char recvbuffP1[9];
+		char buffer[9];
+		char buffer2[9];
+		{
+			cid::CResult result = cid::CResult::C_Success;
+			
+				result = clientPipeSocket.RecvAll(buffer, 9);
+				if (result != cid::CResult::C_Success)
+				{
+					clientPipeSocket.Close();
+					clientPipeSocket2.Close();
+					listener.Close();
+					cid::net::shutdown();
+					return 1;
+				}
+				//std::cout << buffer << std::endl;
+			
+	
+		/*char recvbuffP1[9];
 		int ret, nLeft, idx;
 
 		nLeft = 9;
@@ -292,10 +337,50 @@ int main()
 			}
 			idx += ret;
 			nLeft -= ret;
+		}*/
+			std::cout << "Got message from client 1 " << buffer << std::endl;
 		}
-		std::cout << "Got message from client 1 " << recvbuffP1 << std::endl;
+		std::cout << "received input data from client1" << std::endl;
 
-		char recvbuffP2[9];
+
+		std::cout << "about to receive the input data from client2" << std::endl;
+
+		{
+			cid::CResult result = cid::CResult::C_Success;
+		
+				result = clientPipeSocket2.RecvAll(buffer2, 9);
+				if (result != cid::CResult::C_Success)
+				{
+					clientPipeSocket.Close();
+					clientPipeSocket2.Close();
+					listener.Close();
+					cid::net::shutdown();
+					return 1;
+				}
+				//std::cout << buffer << std::endl;
+		
+
+			/*char recvbuffP1[9];
+			int ret, nLeft, idx;
+
+			nLeft = 9;
+			idx = 0;
+
+			while (nLeft > 0)
+			{
+				ret = recv(clientPipeSocket.GetHandle(), &recvbuffP1[idx], nLeft, 0);
+				if (ret == SOCKET_ERROR)
+				{
+
+				}
+				idx += ret;
+				nLeft -= ret;
+			}*/
+			std::cout << "Got message from client 2 " << buffer2 << std::endl;
+		}
+		std::cout << "received input data from client2" << std::endl;
+
+	/*	char recvbuffP2[9];
 		int ret2, nLeft2, idx2;
 
 		nLeft2 = 9;
@@ -312,44 +397,44 @@ int main()
 			idx2 += ret2;
 			nLeft2 -= ret2;
 		}
-		std::cout << "Got message from client 2: " << recvbuffP2 << std::endl;
+		std::cout << "Got message from client 2: " << recvbuffP2 << std::endl;*/
 
 
 		// use input to update world
-		if (recvbuffP1[(int)InputType::Escape] == '1' || recvbuffP2[(int)InputType::Escape] == '1')
+		if (buffer[(int)InputType::Escape] == '1' || buffer2[(int)InputType::Escape] == '1')
 			break;
 		dt = timer.restart().asSeconds();
-		if (recvbuffP1[(int)InputType::Right] == '1')
+		if (buffer[(int)InputType::Right] == '1')
 		{
 			p1Pos.x += 40.f * dt;
 		}
-		if (recvbuffP1[(int)InputType::Left] == '1')
+		if (buffer[(int)InputType::Left] == '1')
 		{
 			p1Pos.x -= 40.f * dt;
 		}
-		if (recvbuffP1[(int)InputType::Down] == '1')
+		if (buffer[(int)InputType::Down] == '1')
 		{
 			p1Pos.y += 40.f * dt;
 		}
-		if (recvbuffP1[(int)InputType::Up] == '1')
+		if (buffer[(int)InputType::Up] == '1')
 		{
 			p1Pos.y -= 40.f * dt;
 		}
 
 
-		if (recvbuffP2[(int)InputType::Right] == '1')
+		if (buffer2[(int)InputType::Right] == '1')
 		{
 			p2Pos.x += 40.f * dt;
 		}
-		if (recvbuffP2[(int)InputType::Left] == '1')
+		if (buffer2[(int)InputType::Left] == '1')
 		{
 			p2Pos.x -= 40.f * dt;
 		}
-		if (recvbuffP2[(int)InputType::Down] == '1')
+		if (buffer2[(int)InputType::Down] == '1')
 		{
 			p2Pos.y += 40.f * dt;
 		}
-		if (recvbuffP2[(int)InputType::Up] == '1')
+		if (buffer2[(int)InputType::Up] == '1')
 		{
 			p2Pos.y -= 40.f * dt;
 		}
@@ -359,10 +444,61 @@ int main()
 		std::string posXP2 = ((std::to_string((int)p2Pos.x).length() == 4) ? std::to_string((int)p2Pos.x) : (std::to_string((int)p2Pos.x).length() == 3) ? "0" + std::to_string((int)p2Pos.x) : (std::to_string((int)p2Pos.x).length() == 2) ? "00" + std::to_string((int)p2Pos.x) : "000" + std::to_string((int)p2Pos.x));
 		std::string posYP2 = ((std::to_string((int)p2Pos.y).length() == 3) ? std::to_string((int)p2Pos.y) : (std::to_string((int)p2Pos.y).length() == 2) ? "0" + std::to_string((int)p2Pos.y) : "00" + std::to_string((int)p2Pos.y));
 
-		std::string mystr = posXP1 + posYP1 + posXP2 + posYP2;
-
+		std::string tmp = posXP1 + posYP1 + posXP2 + posYP2;
+		char mystr[15];
+		tmp.copy(mystr, tmp.length());
 		mystr[14] = '\0';
-		const char* sendbuf = mystr.c_str();
+
+		/// send the clients their clientIDs
+	
+		char sendbuffer1[15];
+		char sendbuffer2[15];
+		strcpy_s(sendbuffer1, mystr);
+		strcpy_s(sendbuffer2, mystr);
+
+		/*sf::Vector2f tmp1 = p1Pos;
+		unsigned long long byteCount1 = 0Ui64;
+		while (byteCount1 < sizeof(buffer1))
+			byteCount1 = send(clientPipeSocket.GetHandle(), (char*)&buffer1, sizeof(buffer1), 0);
+		if (byteCount1 == SOCKET_ERROR)
+		{
+			printf("Server send error %d.\n", WSAGetLastError());
+			return -1;
+		}*/
+		std::cout << "about to send to client1 the worlds update data" << std::endl;
+		{
+			cid::CResult result = cid::CResult::C_Success;
+			
+				result = clientPipeSocket.SendAll(sendbuffer1, 15);
+				if (result != cid::CResult::C_Success)
+				{
+					clientPipeSocket.Close();
+					clientPipeSocket2.Close();
+					listener.Close();
+					cid::net::shutdown();
+					return 1;
+				}
+		}
+		std::cout << "sent to client1 the worlds update data" << std::endl;
+
+		std::cout << "about to send to client2 the worlds update data" << std::endl;
+
+		{
+			cid::CResult result = cid::CResult::C_Success;
+			
+				result = clientPipeSocket2.SendAll(sendbuffer2, 15);
+				if (result != cid::CResult::C_Success)
+				{
+					clientPipeSocket.Close();
+					clientPipeSocket2.Close();
+					listener.Close();
+					cid::net::shutdown();
+					return 1;
+				}
+		}
+		std::cout << "sent to client2 the worlds update data" << std::endl;
+
+		/*const char* sendbuf = mystr.c_str();
 		int bytesSent{ 0 }, nlen{ 15 };
 
 		while (bytesSent < 15)
@@ -398,7 +534,7 @@ int main()
 					std::cout << "server: send failed" << WSAGetLastError() << std::endl;
 				}
 				
-			}
+			}*/
 
 
 	}

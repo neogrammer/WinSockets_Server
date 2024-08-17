@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\AUStudent\source\repos\neogrammer\CidNet;$(ProjectDir);C:\sdks\sfml_64\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\AUStudent\source\repos\neogrammer\CidNet\x64\Debug;C:\sdks\sfml_64\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\CidNet;$(ProjectDir);C:\sdks\sfml_64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\CidNet\x64\Debug;C:\sdks\sfml_64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\AUStudent\source\repos\JNet\JNet;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
