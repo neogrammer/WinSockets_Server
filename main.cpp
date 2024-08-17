@@ -6,52 +6,15 @@
 #include <interrelated.h>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Clock.hpp>
+#include <CidNet64.h>
+
 sf::Vector2f p1Pos{ 30.f,700.f };
 sf::Vector2f p2Pos{ 150.f,700.f };
 
 
-
-
-//
-//struct PlayerData
-//{
-//	int xpos{};
-//	int ypos{};
-//};
-//
-//struct BallData
-//{
-//	int xpos{};
-//	int ypos{};
-//};
-//
-//struct FrameData
-//{
-//	int ypos{};
-//};
-//
-//struct WorldData
-//{
-//	int yourYPos{};
-//	int otherYPos{};
-//	int ballXPos{};
-//	int ballYPos{};
-//};
-
 int gPort = 55555;
 int numPlayersConnected = 0;
-//
-//int ballDirX = -1;
-//int ballDirY = 1;
-//int xSpeed = 0;
-//int ySpeed = 0;
-//
-//PlayerData player1{};
-//PlayerData player2{};
-//FrameData inData{};
-//WorldData outData{};
-//BallData ball{};
-//
+
 
 ClientFrameInput p1Input{};
 ClientFrameInput p2Input{};
@@ -60,123 +23,225 @@ void update();
 
 int main()
 {
-	WSADATA wsaData;
-	int wsaerr;
-	WORD wVersionRequested = MAKEWORD(2, 2);
-	wsaerr = WSAStartup(wVersionRequested, &wsaData);
-	if (wsaerr != 0)
+	if (!cid::net::initialize())
 	{
-		std::cout << "The winsock dll not found!" << std::endl;
-		return 0;
+		return 1;
 	}
 	else
 	{
-		std::cout << "The winsock dll was found!" << "\n" << "The status: " << wsaData.szSystemStatus << std::endl;
+		std::cout << "Success on initialization of winsock!" << std::endl;
 	}
+
+	// server to listen for connections on port 4790
+	// socket - bind to 4790
+	// then listen on correct port
+
+	//cid::IPEndpoint test("www.google.com", 8080);
+	//if (test.GetIPVersion() == cid::IPVersion::IPv4)
+	//{
+	//	std::cout << "Hostname: " << test.GetHostname() << std::endl;
+	//	std::cout << "IP: " << test.GetIPStr() << std::endl;
+	//	std::cout << "Port: " << test.GetPort() << std::endl;
+	//	std::cout << "IP Bytes... " << std::endl;
+	//	for (auto& digit : test.GetBytes())
+	//	{
+	//		std::cout << (int)digit << std::endl;
+	//	}
+	//}
+	//else
+	//{
+	//	std::cout << "This is not an ipv4 address" << std::endl;
+	//}
+
+	//WSADATA wsaData;
+	//int wsaerr;
+	//WORD wVersionRequested = MAKEWORD(2, 2);
+	//wsaerr = WSAStartup(wVersionRequested, &wsaData);
+	//if (wsaerr != 0)
+	//{
+	//	std::cout << "The winsock dll not found!" << std::endl;
+	//	return 0;
+	//}
+	//else
+	/*{
+		std::cout << "The winsock dll was found!" << "\n" << "The status: " << wsaData.szSystemStatus << std::endl;
+	}*/
 
 	// set up the socket configuration
-	SOCKET listener = INVALID_SOCKET;
-	listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (listener == INVALID_SOCKET)
+	cid::Socket listener(cid::IPVersion::IPv4, INVALID_SOCKET);
 	{
-		std::cout << "Error at socket(); " << WSAGetLastError() << std::endl;
-		WSACleanup();
-		return 0;
+		auto result = listener.Create();
+		if (result != cid::CResult::C_Success)
+		{
+			std::cout << "Error at socket creation for main connection listener" << std::endl;
+			cid::net::shutdown();
+			return 1;
+		}
+		else
+		{
+			std::cout << "socket connector created" << std::endl;
+		}
+	}
+
+	if (listener.Listen(cid::IPEndpoint("0.0.0.0", gPort)) == cid::CResult::C_Success)
+	{
+		std::cout << "Socket successfully listening on port " << gPort << std::endl;
 	}
 	else
 	{
-		std::cout << "socket() is OK!" << std::endl;
+		std::cout << "socket not listening ton port 55555. failure " << std::endl;
+		listener.Close();
+		cid::net::shutdown();
+		return 1;
 	}
+
+	cid::Socket clientPipeSocket;
+	cid::Socket clientPipeSocket2;
+	if (listener.Accept(clientPipeSocket) == cid::CResult::C_Success)
+	{
+		std::cout << "Player 1 connection established" << std::endl;
+		if (listener.Accept(clientPipeSocket2) == cid::CResult::C_Success)
+		{
+			std::cout << "Player 2 connection established" << std::endl;
+
+
+		}
+		else
+		{
+			std::cout << "Failed to establish a connection with player 2" << std::endl;
+			clientPipeSocket.Close();
+			listener.Close();
+			cid::net::shutdown();
+			return 1;
+		}
+		
+	}
+	else
+	{
+		std::cout << "Failed to establish a connection with player 1" << std::endl;
+		listener.Close();
+		cid::net::shutdown();
+		return 1;
+	}
+
+	// both clients are now connected
+
+	//SOCKET listener = INVALID_SOCKET;
+	//listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//if (listener == INVALID_SOCKET)
+	//{
+	//	std::cout << "Error at socket(); " << WSAGetLastError() << std::endl;
+	//	cid::net::shutdown();
+	//	return 0;
+	//}
+	//else
+	//{
+	//	std::cout << "socket() is OK!" << std::endl;
+	//}
 
    // Get the hostname of the current machine
-char hostname[256];
-if (gethostname(hostname, sizeof(hostname)) != 0) {
-	std::cout << "gethostname failed" << std::endl;
-	WSACleanup();
-	return 0;
-}
+//char hostname[256];
+//if (gethostname(hostname, sizeof(hostname)) != 0) {
+//	std::cout << "gethostname failed" << std::endl;
+//	cid::net::shutdown();
+//	return 0;
+//}
+//
+//// Get the IP address of the current machine
+//struct addrinfo hints, * result, * ptr;
+//ZeroMemory(&hints, sizeof(hints));
+//hints.ai_family = AF_INET;
+//hints.ai_socktype = SOCK_STREAM;
+//hints.ai_flags = AI_PASSIVE;
+//
+//if (getaddrinfo(hostname, NULL, &hints, &result) != 0) {
+//	std::cout << "getaddrinfo failed" << std::endl;
+//	cid::net::shutdown();
+//	return 0;
+//}
+//
+//sockaddr_in service;
+//for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+//	if (ptr->ai_family == AF_INET) {
+//		service.sin_family = AF_INET;
+//		service.sin_addr = ((struct sockaddr_in*)ptr->ai_addr)->sin_addr;
+//		service.sin_port = htons(gPort);
+//		break;
+//	}
+//}
+//
+//freeaddrinfo(result);
+//
+//// bind the specifics for the socket with its specific configuration
+//if (bind(listener.GetHandle(), (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) {
+//	std::cout << "bind failed on listener" << WSAGetLastError() << std::endl;
+//	closesocket(listener.GetHandle());
+//	cid::net::shutdown();
+//	return 0;
+//}
+//else {
+//	std::cout << "Socket bound!" << std::endl;
+//}
 
-// Get the IP address of the current machine
-struct addrinfo hints, * result, * ptr;
-ZeroMemory(&hints, sizeof(hints));
-hints.ai_family = AF_INET;
-hints.ai_socktype = SOCK_STREAM;
-hints.ai_flags = AI_PASSIVE;
-
-if (getaddrinfo(hostname, NULL, &hints, &result) != 0) {
-	std::cout << "getaddrinfo failed" << std::endl;
-	WSACleanup();
-	return 0;
-}
-
-sockaddr_in service;
-for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
-	if (ptr->ai_family == AF_INET) {
-		service.sin_family = AF_INET;
-		service.sin_addr = ((struct sockaddr_in*)ptr->ai_addr)->sin_addr;
-		service.sin_port = htons(gPort);
-		break;
-	}
-}
-
-freeaddrinfo(result);
-
-// bind the specifics for the socket with its specific configuration
-if (bind(listener, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) {
-	std::cout << "bind failed on listener" << WSAGetLastError() << std::endl;
-	closesocket(listener);
-	WSACleanup();
-	return 0;
-}
-else {
-	std::cout << "Socket bound!" << std::endl;
-}
-
-if (listen(listener, 8) == SOCKET_ERROR) {
-	std::cout << "listen(): Error listening on socket! " << WSAGetLastError() << std::endl;
-	closesocket(listener);
-	WSACleanup();
-	return 0;
-}
-else {
-	std::cout << "Socket now listening for incoming requests on port: " << gPort << std::endl;
-}
-
-std::cout << "Waiting for client connection" << std::endl;
-
-	SOCKET clientPipeSocket = INVALID_SOCKET;
-	clientPipeSocket = accept(listener, NULL, NULL);
-	if (clientPipeSocket == INVALID_SOCKET)
+//if (listen(listener.GetHandle(), 8) == SOCKET_ERROR) {
+//	std::cout << "listen(): Error listening on socket! " << WSAGetLastError() << std::endl;
+//	listener.Close();
+//	cid::net::shutdown();
+//	return 0;
+//}
+//else {
+//	std::cout << "Socket now listening for incoming requests on port: " << gPort << std::endl;
+//}
+//
+//std::cout << "Waiting for client connection" << std::endl;
+//
+//	SOCKET clientPipeSocket = INVALID_SOCKET;
+//	clientPipeSocket = accept(listener.GetHandle(), NULL, NULL);
+//	if (clientPipeSocket == INVALID_SOCKET)
+//	{
+//		std::cout << "accept failed: " << WSAGetLastError() << std::endl;
+//		closesocket(listener.GetHandle());
+//		cid::net::shutdown();
+//		return 0;
+//	}
+//	else
+//	{
+//		std::cout << "Connection established!" << std::endl;
+//		std::cout << ++numPlayersConnected << " player(s) connected, starting game" << std::endl;
+//		numPlayersConnected++;
+//	}
+//	
+//	SOCKET clientPipeSocket2 = INVALID_SOCKET;
+//	clientPipeSocket2 = accept(listener.GetHandle(), NULL, NULL);
+//	if (clientPipeSocket2 == INVALID_SOCKET)
+//	{
+//		std::cout << "accept failed with player 2: " << WSAGetLastError() << std::endl;
+//		closesocket(clientPipeSocket2);
+//		closesocket(listener.GetHandle());
+//		cid::net::shutdown();
+//		return 0;
+//	}
+//	else
+//	{
+//		std::cout << "Connection established!" << std::endl;
+//		std::cout << ++numPlayersConnected << "Second player(s) connected, starting game" << std::endl;
+//		numPlayersConnected++;
+//	}
 	{
-		std::cout << "accept failed: " << WSAGetLastError() << std::endl;
-		closesocket(listener);
-		WSACleanup();
-		return 0;
+		char buffer[256];
+		strcpy_s(buffer, "Hello world from client!\0");
+		int bytesSent = 0;
+		cid::CResult result = cid::CResult::C_Success;
+		while (result == cid::CResult::C_Success)
+		{
+			result = clientPipeSocket.Send(buffer, 256, bytesSent);
+			std::cout  << "Attempting to send chunk of data..." << std::endl;
+			Sleep(500);
+		}
 	}
-	else
 	{
-		std::cout << "Connection established!" << std::endl;
-		std::cout << ++numPlayersConnected << " player(s) connected, starting game" << std::endl;
-		numPlayersConnected++;
-	}
 	
-	SOCKET clientPipeSocket2 = INVALID_SOCKET;
-	clientPipeSocket2 = accept(listener, NULL, NULL);
-	if (clientPipeSocket2 == INVALID_SOCKET)
-	{
-		std::cout << "accept failed with player 2: " << WSAGetLastError() << std::endl;
-		closesocket(clientPipeSocket2);
-		closesocket(listener);
-		WSACleanup();
-		return 0;
 	}
-	else
-	{
-		std::cout << "Connection established!" << std::endl;
-		std::cout << ++numPlayersConnected << "Second player(s) connected, starting game" << std::endl;
-		numPlayersConnected++;
-	}
-
 	{
 		/// send the clients their clientIDs
 		char buffer1[2] = { '1','\0' };
@@ -184,135 +249,25 @@ std::cout << "Waiting for client connection" << std::endl;
 		sf::Vector2f tmp1 = p1Pos;
 		unsigned long long byteCount1 = 0Ui64;
 		while (byteCount1 < sizeof(buffer1))
-			byteCount1 = send(clientPipeSocket, (char*)&buffer1, sizeof(buffer1), 0);
+			byteCount1 = send(clientPipeSocket.GetHandle(), (char*)&buffer1, sizeof(buffer1), 0);
 		if (byteCount1 == SOCKET_ERROR)
 		{
 			printf("Server send error %d.\n", WSAGetLastError());
 			return -1;
 		}
-		else
-		{
-			//printf("Server: sent %ld bytes \n to player 1", byteCount1);
-		}
+		
 
 
 		sf::Vector2f tmp2 = p2Pos;
 		unsigned long long byteCount2 = 0Ui64;
 		while (byteCount2 < sizeof(buffer2))
-			byteCount2 = send(clientPipeSocket2, (char*)&buffer2, sizeof(buffer2), 0);
+			byteCount2 = send(clientPipeSocket2.GetHandle(), (char*)&buffer2, sizeof(buffer2), 0);
 		if (byteCount2 == SOCKET_ERROR)
 		{
-			//printf("Server send error %d.\n", WSAGetLastError());
 			return -1;
 		}
-		else
-		{
-			//printf("Server: sent %ld bytes \n to player 2", byteCount2);
-		}
 	}
-	//message "3803800785435" -> out
-	// message "380"  <- in  for each client
 
-
-	//client connected, detach it on another thread and run that, then set up another thread for listening for other requests to join as long as numPlayersConnected < 4
-	// with those two threads running, in a main loop, first check if any data came in on any of those threads
-	// if the pipe sent data, get the data and use it to update the game world, then send the updated data back out to the players connected, then once they all got the data successfullly,
-	//  invalidate all the data on the pipes, and wait for data to come in on one of the pipes ( or all), then update and broadcast back out and rinse and repeat
-
-	// if client connects, bind the new socket to a new pipe on a new thread and detach it and increase number of players connected and if < 4 create a new listening thread and repeat
-
-	// int send ( SOCKET, const char* buf //MESSAGE//, int len //Length of Message Array(individual characters)//, int flags //DEFAULT OK- pass 0//); 
-	//  returns number of bytes sent, non-zero is ideal here
-
-	/*ball.xpos = 785;
-	ball.ypos = 435;
-
-	xSpeed = 3;
-	ySpeed = 3;
-
-	ballDirX = -1;
-	ballDirY = 1;
-	
-	player1.xpos = 40;
-	player2.xpos = 1510;*/
-
-	//	// Send a response to the client
-	//	char buffer[8];
-	//	std::cout << "Enter the message: ";
-	//	buffer[0] = _itoa_s'1';
-	//	buffer[1] = '1';
-	//	buffer[2] = '1';
-	//	buffer[3] = '1';
-	//	buffer[4] = '1';
-	//	buffer[5] = '1';
-	//	buffer[6] = '1';
-	//	buffer[7] = '\0';
-
-	//	111111\0';
-	//	int sbyteCount = send(clientPipeSocket, buffer, 200, 0);
-	//	if (sbyteCount == SOCKET_ERROR) {
-	//		std::cout << "Server send error: " << WSAGetLastError() << std::endl;
-	//		return -1;
-	//	}
-	//	else {
-	//		std::cout << "Server: Sent " << sbyteCount << " bytes" << std::endl;
-	//	}
-
-	//	// Receive data from the client
-	//	char receiveBuffer[200];
-	//	int rbyteCount = recv(acceptSocket, receiveBuffer, 200, 0);
-	//	if (rbyteCount < 0) {
-	//		std::cout << "Server recv error: " << WSAGetLastError() << std::endl;
-	//		return 0;
-	//	}
-	//	else {
-	//		std::cout << "Received data: " << receiveBuffer << std::endl;
-	//	}
-
-	//	
-	//	ClientFrameInput tmp;
-
-	//	
-	//	int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
-	//	if (byteCount < 0)
-	//	{
-	//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-	//		closesocket(clientPipeSocket2);
-	//		closesocket(clientPipeSocket);
-
-	//		WSACleanup();
-	//		return 0;
-	//	}
-	//	p1Input.attack = tmp.attack;
-	//	p1Input.start = tmp.start;
-	//	p1Input.run = tmp.run;
-	//	p1Input.left = tmp.left;
-	//	p1Input.right = tmp.right;
-	//	p1Input.down = tmp.down;
-	//	p1Input.up = tmp.up;
-	//}
-
-	//{
-	//	ClientFrameInput tmp2;
-	//	
-	//	int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
-	//	if (byteCount2 < 0)
-	//	{
-	//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-	//		closesocket(clientPipeSocket2);
-	//		closesocket(clientPipeSocket);
-
-	//		WSACleanup();
-	//		return 0;
-	//	}
-	//	p2Input.attack = tmp2.attack;
-	//	p2Input.start = tmp2.start;
-	//	p2Input.run = tmp2.run;
-	//	p2Input.left = tmp2.left;
-	//	p2Input.right = tmp2.right;
-	//	p2Input.down = tmp2.down;
-	//	p2Input.up = tmp2.up;
-	//}
 	float dt{ 0.f };
 	sf::Vector2f p1Pos{ 50.f, 600.f };
 
@@ -322,8 +277,6 @@ std::cout << "Waiting for client connection" << std::endl;
 	while (true)
 	{
 
-
-
 		char recvbuffP1[9];
 		int ret, nLeft, idx;
 
@@ -332,7 +285,7 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		while (nLeft > 0)
 		{
-			ret = recv(clientPipeSocket, &recvbuffP1[idx], nLeft, 0);
+			ret = recv(clientPipeSocket.GetHandle(), &recvbuffP1[idx], nLeft, 0);
 			if (ret == SOCKET_ERROR)
 			{
 
@@ -342,11 +295,6 @@ std::cout << "Waiting for client connection" << std::endl;
 		}
 		std::cout << "Got message from client 1 " << recvbuffP1 << std::endl;
 
-
-
-
-
-
 		char recvbuffP2[9];
 		int ret2, nLeft2, idx2;
 
@@ -355,7 +303,7 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		while (nLeft2 > 0)
 		{
-			ret2 = recv(clientPipeSocket2, &recvbuffP2[idx2], nLeft2, 0);
+			ret2 = recv(clientPipeSocket2.GetHandle(), &recvbuffP2[idx2], nLeft2, 0);
 
 			if (ret2 == SOCKET_ERROR)
 			{
@@ -419,28 +367,15 @@ std::cout << "Waiting for client connection" << std::endl;
 
 		while (bytesSent < 15)
 		{
-			bytesSent = send(clientPipeSocket, const_cast<char*>(sendbuf), 15, 0);
+			bytesSent = send(clientPipeSocket.GetHandle(), const_cast<char*>(sendbuf), 15, 0);
 
 			if (bytesSent == SOCKET_ERROR)
 			{
 				std::cout << "server: send failed" << WSAGetLastError() << std::endl;
 			}
-			else
-			{
-				//std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
-
-			}
+			
 		}
-		//std::cout << "server: sent message";
-		/*	else
-			{
-				std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
-				memset(&ThisSenderInfo, 0, sizeof(ThisSenderInfo));
-				nlen - sizeof(ThisSenderInfo);
 
-				getsockname(connSocket, (SOCKADDR*)&ThisSenderInfo, &nlen);
-
-			}*/
 
 
 
@@ -456,235 +391,38 @@ std::cout << "Waiting for client connection" << std::endl;
 
 			while (bytesSent2 < 15)
 			{
-				bytesSent2 = send(clientPipeSocket2, const_cast<char*>(sendbuf2), 15, 0);
+				bytesSent2 = send(clientPipeSocket2.GetHandle(), const_cast<char*>(sendbuf2), 15, 0);
 
 				if (bytesSent2 == SOCKET_ERROR)
 				{
 					std::cout << "server: send failed" << WSAGetLastError() << std::endl;
 				}
-				else
-				{
-					//std::cout << "server: sent total " << bytesSent << " bytes of 27 bytes sent total" << std::endl;
-
-				}
+				
 			}
-			//std::cout << "server: sent message";
-			/*	else
-				{
-					std::cout << "Client: send ok" << WSAGetLastError() << std::endl;
-					memset(&ThisSenderInfo, 0, sizeof(ThisSenderInfo));
-					nlen - sizeof(ThisSenderInfo);
 
-					getsockname(connSocket, (SOCKADDR*)&ThisSenderInfo, &nlen);
-
-				}*/
-
-
-
-
-		
-
-
-
-		// pack new values into entities and send the data to each
-		
-		//{
-		//	struct combo
-		//	{
-		//		float tmp1x{ 0.f }, tmp1y{ 0.f };
-		//		float tmp2x{ 0.f }, tmp2y{ 0.f };
-		//	};
-
-		//	combo data;
-		//	/// send the clients their clientIDs
-		//
-		//	unsigned long long byteCount1 = 0Ui64;
-		//	while (byteCount1 < sizeof(combo))
-		//		byteCount1 = send(clientPipeSocket, (char*)&data, sizeof(combo), 0);
-		//	if (byteCount1 == SOCKET_ERROR)
-		//	{
-		//		//printf("Server send error %d.\n", WSAGetLastError());
-		//		return -1;
-		//	}
-		//	else
-		//	{
-		//		//printf("Server: sent %ld bytes \n to player 1", byteCount1);
-		//	}
-
-		//	auto t = data.tmp1x;
-		//	data.tmp1x = data.tmp2x;
-		//	data.tmp2x = t;
-		//	auto t2 = data.tmp1y;
-		//	data.tmp1y = data.tmp2y;
-		//	data.tmp2y = t2;
-		////	sf::Vector2f tmp2 = p2Pos;
-		//	unsigned long long byteCount2 = 0Ui64;
-		//	while (byteCount2 < sizeof(combo))
-		//		byteCount2 = send(clientPipeSocket2, (char*)&data, sizeof(combo), 0);
-		//	if (byteCount2 == SOCKET_ERROR)
-		//	{
-		//		//printf("Server send error %d.\n", WSAGetLastError());
-		//		return -1;
-		//	}
-		//	else
-		//	{
-		//		//printf("Server: sent %ld bytes \n to player 2", byteCount2);
-		//	}
-		//}
-
-		//
-
-		//// collect input
-		//{
-		//	ClientFrameInput tmp;
-
-		//	
-		//	int byteCount = recv(clientPipeSocket, (char*)&tmp, sizeof(ClientFrameInput), 0);
-		//	if (byteCount < 0)
-		//	{
-		//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-		//		closesocket(clientPipeSocket);
-		//		closesocket(clientPipeSocket2);
-
-		//		WSACleanup();
-		//		return 0;
-		//	}
-		//	p1Input.attack = tmp.attack;
-		//	p1Input.start = tmp.start;
-		//	p1Input.run = tmp.run;
-		//	p1Input.left = tmp.left;
-		//	p1Input.right = tmp.right;
-		//	p1Input.down = tmp.down;
-		//	p1Input.up = tmp.up;
-		//}
-
-		//{
-		//	ClientFrameInput tmp2;
-		//	int byteCount2 = recv(clientPipeSocket2, (char*)&tmp2, sizeof(ClientFrameInput), 0);
-		//	if (byteCount2 < 0)
-		//	{
-		//		std::cout << "Unable to receive data from server supplying the Client ID for this machine" << std::endl;
-		//		closesocket(clientPipeSocket2);
-		//		closesocket(clientPipeSocket);
-
-		//		WSACleanup();
-		//		return 0;
-		//	}
-		//	p2Input.attack = tmp2.attack;
-		//	p2Input.start = tmp2.start;
-		//	p2Input.run = tmp2.run;
-		//	p2Input.left = tmp2.left;
-		//	p2Input.right = tmp2.right;
-		//	p2Input.down = tmp2.down;
-		//	p2Input.up = tmp2.up;
-		//}
-
-
-		//int readBytes = 0;
-		//char readBuffer[4];
-		//readBytes = recv(clientPipeSocket, readBuffer, 4, 0);
-		//if (readBytes == SOCKET_ERROR)
-		//{
-		//	//error
-		//	goto loopend;
-		//}
-
-		//int readBytes2 = 0;
-		//char readBuffer2[4];
-		//readBytes2 = recv(clientPipeSocket2, readBuffer2, 4, 0);
-		//if (readBytes2 == SOCKET_ERROR)
-		//{
-		//	//error
-		//	goto loopend;
-
-		//}
-
-		// Update world here
-
-
-
-		//std::string tmp = "000";
-		//tmp.at(0) = readBuffer[0];
-		//tmp.at(1) = readBuffer[1];
-		//tmp.at(2) = readBuffer[2];
-
-		//int newYPos = stoi(tmp);
-		//player1.ypos = newYPos;
-
-		//std::string tmp2 = "000";
-		//tmp2.at(0) = readBuffer2[0];
-		//tmp2.at(1) = readBuffer2[1];
-		//tmp2.at(2) = readBuffer2[2];
-
-		//int newYPos2 = stoi(tmp2);
-		//player2.ypos = newYPos2;
-
-		//
-
-		//update();
-		//std::string ballxStr = "0000";
-		//std::string bx = std::to_string(ball.xpos);
-		//size_t diff = ballxStr.length() - bx.length();
-		//for (size_t i = 0; i < bx.length(); i++)
-		//{
-		//	ballxStr.at(i + diff) =  bx.at(i);
-		//}
-
-
-		//std::string ballyStr = "000";
-		//std::string by = std::to_string(ball.ypos);
-		//size_t diffy = ballyStr.length() - by.length();
-		//for (size_t i = 0; i < by.length(); i++)
-		//{
-		//	ballyStr.at(i + diffy) = by.at(i);
-		//}
-
-
-		// package updated data into message string and add it to the write buffer
-
-
-		//int sentBytes = 0;
-		//char writeBuffer[14] = "0000000000000";// { tmp[0],tmp[1],tmp[2],tmp2[0],tmp2[1],tmp2[2],ballxStr[0],ballxStr[1],ballxStr[2],ballxStr[3],ballyStr[0],ballyStr[1],ballyStr[2],'\0'};
-	 //   sentBytes = send(clientPipeSocket, writeBuffer, 14, 0);
-		//if (sentBytes == SOCKET_ERROR)
-		//{
-		//	//error
-		//	goto loopend;
-
-		//}
-
-		//int sentBytes2 = 0;
-		//char writeBuffer2[14] = "0000000000000";  //{ tmp2[0],tmp2[1],tmp2[2],tmp[0],tmp[1],tmp[2],ballxStr[0],ballxStr[1],ballxStr[2],ballxStr[3],ballyStr[0],ballyStr[1],ballyStr[2],'\0' };
-		//sentBytes2 = send(clientPipeSocket2, writeBuffer2, 14, 0);
-		//if (sentBytes2 == SOCKET_ERROR)
-		//{
-		//	//error
-		//	goto loopend;
-
-		//}
 
 	}
-	loopend:
+
 
 
 	// exit program
 
 
 	//close any open sockets
-	if (listener != INVALID_SOCKET)
+	if (listener.GetHandle() != INVALID_SOCKET)
 	{
-		closesocket(listener);
+		listener.Close();
 	}
-	if (clientPipeSocket != INVALID_SOCKET)
+	if (clientPipeSocket.GetHandle() != INVALID_SOCKET)
 	{
-		closesocket(clientPipeSocket);
+		clientPipeSocket.Close();
 	}
-	if (clientPipeSocket2 != INVALID_SOCKET)
+	if (clientPipeSocket2.GetHandle() != INVALID_SOCKET)
 	{
-		closesocket(clientPipeSocket2);
+		clientPipeSocket2.Close();
 	}
 
-	WSACleanup();
+	cid::net::shutdown();
 
 	return 0;
 }
