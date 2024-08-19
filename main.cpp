@@ -25,6 +25,10 @@ bool client2Connected{ false };
 cid::SocketHandle client1Handle{ };
 cid::SocketHandle client2Handle{ };
 
+
+PlayerAnimType player1Anim = PlayerAnimType::Idle; // idle
+PlayerAnimType player2Anim = PlayerAnimType::Idle; // idle
+
 void update();
 
 int main()
@@ -167,26 +171,6 @@ startover:
 			goto startover;
 		}
 	}
-
-	//if (client2Connected == false)
-	//{
-	//	char buffer1[2];
-	//	strcpy_s(buffer1, "y\0");
-	//	auto result = clientPipeSocket2.SendAll(buffer1, 2);
-	//	if (result == cid::CResult::C_Success)
-	//	{
-	//		std::cout << "Player 1 successfully received their client ID: 1" << std::endl;
-	//		client2Connected = true;
-	//	}
-	//	else
-	//	{
-	//		std::cout << "Something happened to the connection, listening for player one again" << std::endl;
-	//		client2Connected = false;
-	//		clientPipeSocket2.Close();
-	//		goto startover;
-	//	}
-	//}
-
 
 	float dt{ 0.f };
 	sf::Vector2f p1Pos{ 50.f, 600.f };
@@ -455,57 +439,85 @@ startover:
 
 		}
 
+		
 
 		dt = timer.restart().asSeconds();
 		if (buffer[(int)InputType::Right] == '1')
 		{
+			if (player1Anim != PlayerAnimType::Run)
+				player1Anim = PlayerAnimType::Run;
 			p1Pos.x += 40.f * dt;
 		}
-		if (buffer[(int)InputType::Left] == '1')
+		else if (buffer[(int)InputType::Left] == '1')
 		{
+			if (player1Anim != PlayerAnimType::Run)
+				player1Anim = PlayerAnimType::Run;
 			p1Pos.x -= 40.f * dt;
 		}
-		if (buffer[(int)InputType::Down] == '1')
+		else if (buffer[(int)InputType::Down] == '1')
 		{
+			if (player1Anim != PlayerAnimType::Run)
+				player1Anim = PlayerAnimType::Run;
 			p1Pos.y += 40.f * dt;
 		}
-		if (buffer[(int)InputType::Up] == '1')
+		else if (buffer[(int)InputType::Up] == '1')
 		{
+			if (player1Anim != PlayerAnimType::Run)
+				player1Anim = PlayerAnimType::Run;
 			p1Pos.y -= 40.f * dt;
 		}
-
+		else
+		{
+			if (player1Anim != PlayerAnimType::Idle)
+				player1Anim = PlayerAnimType::Idle;
+		}
 
 		if (buffer2[(int)InputType::Right] == '1')
 		{
+			if (player2Anim != PlayerAnimType::Run)
+				player2Anim = PlayerAnimType::Run;
 			p2Pos.x += 40.f * dt;
 		}
-		if (buffer2[(int)InputType::Left] == '1')
+		else if (buffer2[(int)InputType::Left] == '1')
 		{
+			if (player2Anim != PlayerAnimType::Run)
+				player2Anim = PlayerAnimType::Run;
 			p2Pos.x -= 40.f * dt;
+
 		}
-		if (buffer2[(int)InputType::Down] == '1')
+		else if (buffer2[(int)InputType::Down] == '1')
 		{
+			if (player2Anim != PlayerAnimType::Run)
+				player2Anim = PlayerAnimType::Run;
 			p2Pos.y += 40.f * dt;
 		}
-		if (buffer2[(int)InputType::Up] == '1')
+		else if (buffer2[(int)InputType::Up] == '1')
 		{
+			if (player2Anim != PlayerAnimType::Run)
+				player2Anim = PlayerAnimType::Run;
 			p2Pos.y -= 40.f * dt;
+		}
+		else
+		{
+			if (player2Anim != PlayerAnimType::Idle)
+				player2Anim = PlayerAnimType::Idle;
 		}
 
 		std::string posXP1 = ((std::to_string((int)p1Pos.x).length() == 4) ? std::to_string((int)p1Pos.x) : (std::to_string((int)p1Pos.x).length() == 3) ? "0" + std::to_string((int)p1Pos.x) : (std::to_string((int)p1Pos.x).length() == 2) ? "00" + std::to_string((int)p1Pos.x) : "000" + std::to_string((int)p1Pos.x));
 		std::string posYP1 = ((std::to_string((int)p1Pos.y).length() == 3) ? std::to_string((int)p1Pos.y) : (std::to_string((int)p1Pos.y).length() == 2) ? "0" + std::to_string((int)p1Pos.y) : "00" + std::to_string((int)p1Pos.y));
 		std::string posXP2 = ((std::to_string((int)p2Pos.x).length() == 4) ? std::to_string((int)p2Pos.x) : (std::to_string((int)p2Pos.x).length() == 3) ? "0" + std::to_string((int)p2Pos.x) : (std::to_string((int)p2Pos.x).length() == 2) ? "00" + std::to_string((int)p2Pos.x) : "000" + std::to_string((int)p2Pos.x));
 		std::string posYP2 = ((std::to_string((int)p2Pos.y).length() == 3) ? std::to_string((int)p2Pos.y) : (std::to_string((int)p2Pos.y).length() == 2) ? "0" + std::to_string((int)p2Pos.y) : "00" + std::to_string((int)p2Pos.y));
-
+		std::string animP1 = std::to_string((int)player1Anim);
+		std::string animP2 = std::to_string((int)player2Anim);
 		std::string tmp = posXP1 + posYP1 + posXP2 + posYP2;
-		char mystr[15];
+		char mystr[17];
 		tmp.copy(mystr, tmp.length());
-		mystr[14] = '\0';
+		mystr[16] = '\0';
 
 		/// send the clients their clientIDs
 	
-		char sendbuffer1[15];
-		char sendbuffer2[15];
+		char sendbuffer1[17];
+		char sendbuffer2[17];
 		strcpy_s(sendbuffer1, mystr);
 		strcpy_s(sendbuffer2, mystr);
 
@@ -514,7 +526,7 @@ startover:
 		{
 			cid::CResult result = cid::CResult::C_Success;
 			tryagain12:
-				result = clientPipeSocket.SendAll(sendbuffer1, 15);
+				result = clientPipeSocket.SendAll(sendbuffer1, 17);
 				if (result != cid::CResult::C_Success)
 				{
 					std::cout << "oh no!  player one disconnected" << std::endl;
@@ -537,7 +549,7 @@ startover:
 		{
 			cid::CResult result = cid::CResult::C_Success;
 			tryagain13:
-				result = clientPipeSocket2.SendAll(sendbuffer2, 15);
+				result = clientPipeSocket2.SendAll(sendbuffer2, 17);
 				if (result != cid::CResult::C_Success)
 				{
 					std::cout << "oh no!  player one disconnected" << std::endl;
