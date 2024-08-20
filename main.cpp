@@ -444,62 +444,52 @@ startover:
 		dt = timer.restart().asSeconds();
 		if (buffer[(int)InputType::Right] == '1')
 		{
-			if (player1Anim != PlayerAnimType::Run)
 				player1Anim = PlayerAnimType::Run;
 			p1Pos.x += 40.f * dt;
 		}
 		else if (buffer[(int)InputType::Left] == '1')
 		{
-			if (player1Anim != PlayerAnimType::Run)
 				player1Anim = PlayerAnimType::Run;
 			p1Pos.x -= 40.f * dt;
 		}
 		else if (buffer[(int)InputType::Down] == '1')
 		{
-			if (player1Anim != PlayerAnimType::Run)
 				player1Anim = PlayerAnimType::Run;
 			p1Pos.y += 40.f * dt;
 		}
 		else if (buffer[(int)InputType::Up] == '1')
 		{
-			if (player1Anim != PlayerAnimType::Run)
 				player1Anim = PlayerAnimType::Run;
 			p1Pos.y -= 40.f * dt;
 		}
 		else
 		{
-			if (player1Anim != PlayerAnimType::Idle)
 				player1Anim = PlayerAnimType::Idle;
 		}
 
 		if (buffer2[(int)InputType::Right] == '1')
 		{
-			if (player2Anim != PlayerAnimType::Run)
 				player2Anim = PlayerAnimType::Run;
 			p2Pos.x += 40.f * dt;
 		}
 		else if (buffer2[(int)InputType::Left] == '1')
 		{
-			if (player2Anim != PlayerAnimType::Run)
 				player2Anim = PlayerAnimType::Run;
 			p2Pos.x -= 40.f * dt;
 
 		}
 		else if (buffer2[(int)InputType::Down] == '1')
 		{
-			if (player2Anim != PlayerAnimType::Run)
 				player2Anim = PlayerAnimType::Run;
 			p2Pos.y += 40.f * dt;
 		}
 		else if (buffer2[(int)InputType::Up] == '1')
 		{
-			if (player2Anim != PlayerAnimType::Run)
 				player2Anim = PlayerAnimType::Run;
 			p2Pos.y -= 40.f * dt;
 		}
 		else
 		{
-			if (player2Anim != PlayerAnimType::Idle)
 				player2Anim = PlayerAnimType::Idle;
 		}
 
@@ -509,7 +499,7 @@ startover:
 		std::string posYP2 = ((std::to_string((int)p2Pos.y).length() == 3) ? std::to_string((int)p2Pos.y) : (std::to_string((int)p2Pos.y).length() == 2) ? "0" + std::to_string((int)p2Pos.y) : "00" + std::to_string((int)p2Pos.y));
 		std::string animP1 = std::to_string((int)player1Anim);
 		std::string animP2 = std::to_string((int)player2Anim);
-		std::string tmp = posXP1 + posYP1 + posXP2 + posYP2;
+		std::string tmp = posXP1 + posYP1 + posXP2 + posYP2 + animP1 + animP2;
 		char mystr[17];
 		tmp.copy(mystr, tmp.length());
 		mystr[16] = '\0';
